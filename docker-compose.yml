@@ -1,0 +1,148 @@
+version: "3.9"
+
+services:
+  sevahealth-api:
+    build:
+      context: .
+      dockerfile: infrastructure/docker/Dockerfile.api
+    container_name: sevahealth-api
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - ENVIRONMENT=production
+      - DATABASE_URL=postgresql+psycopg://seva:seva_password@postgres:5432/sevahealth_db
+      - REDIS_URL=redis://redis:6379/0
+      - S3_ENDPOINT=http://minio:9000
+      - S3_ACCESS_KEY=minioadmin
+      - S3_SECRET_KEY=minioadmin
+      - S3_BUCKET_NAME=sevahealth-medical-vault
+      - AI_PROVIDER=MOCK
+      - LOG_LEVEL=INFO
+      - EHRBASE_URL=http://ehrbase:8080/ehrbase/rest/openehr/v1
+      - EHRBASE_USER=ehrbase-user
+      - EHRBASE_PASSWORD=SuperSecretPassword
+      - CLINICAL_REPOSITORY_BACKEND=hybrid
+    depends_on:
+      postgres:
+
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    networks:
+      - sevahealth-network
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: sevahealth-postgres
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: seva
+      POSTGRES_PASSWORD: seva_password
+      POSTGRES_DB: sevahealth_db
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./infrastructure/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U seva -d sevahealth_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - sevahealth-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: sevahealth-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - sevahealth-network
+
+  minio:
+    image: minio/minio:RELEASE.2024-05-10T01-41-38Z
+    container_name: sevahealth-minio
+    restart: unless-stopped
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    command: server /data --console-address ":9001"
+    volumes:
+      - minio-data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+  ehrdb:
+    image: postgres:16-alpine
+    container_name: sevahealth-ehrdb
+    restart: unless-stopped
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_USER: ehrbase
+      POSTGRES_PASSWORD: ehrbase_password
+      POSTGRES_DB: ehrbase
+    volumes:
+      - ehrdb-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ehrbase -d ehrbase"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - sevahealth-network
+
+  ehrbase:
+    image: ehrbase/ehrbase:next
+    container_name: sevahealth-ehrbase
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      DB_URL: jdbc:postgresql://ehrdb:5432/ehrbase
+      DB_USER: ehrbase
+      DB_PASS: ehrbase_password
+      SECURITY_AUTHTYPE: BASIC
+      SECURITY_AUTHADMIN_USER: ehrbase-admin
+      SECURITY_AUTHADMIN_PASSWORD: SuperSecretAdminPassword
+      SECURITY_AUTHUSER_USER: ehrbase-user
+      SECURITY_AUTHUSER_PASSWORD: SuperSecretPassword
+      SERVER_NODENAME: sevahealth.karnataka.in
+    depends_on:
+      ehrdb:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/ehrbase/rest/status"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - sevahealth-network
+
+networks:
+  sevahealth-network:
+    driver: bridge
+
+volumes:
+  postgres-data:
+  redis-data:
+  minio-data:
+  ehrdb-data:
+

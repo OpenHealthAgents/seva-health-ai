@@ -1,0 +1,418 @@
+{
+  "_type": "COMPOSITION",
+  "name": {
+    "_type": "DV_TEXT",
+    "value": "Diagnostic Laboratory Report"
+  },
+  "archetype_node_id": "openEHR-EHR-COMPOSITION.report-result.v1",
+  "archetype_details": {
+    "archetype_id": {
+      "value": "openEHR-EHR-COMPOSITION.report-result.v1"
+    },
+    "template_id": {
+      "value": "SevaHealth_Lab_Report_v1"
+    },
+    "rm_version": "1.0.4"
+  },
+  "language": {
+    "_type": "CODE_PHRASE",
+    "terminology_id": {
+      "value": "ISO_639-1"
+    },
+    "code_string": "en"
+  },
+  "territory": {
+    "_type": "CODE_PHRASE",
+    "terminology_id": {
+      "value": "ISO_3166-1"
+    },
+    "code_string": "IN"
+  },
+  "category": {
+    "_type": "DV_CODED_TEXT",
+    "value": "event",
+    "defining_code": {
+      "_type": "CODE_PHRASE",
+      "terminology_id": {
+        "value": "openehr"
+      },
+      "code_string": "433"
+    }
+  },
+  "composer": {
+    "_type": "PARTY_IDENTIFIED",
+    "name": "Dr. Radhika Rao (Pathologist)"
+  },
+  "context": {
+    "_type": "EVENT_CONTEXT",
+    "start_time": {
+      "_type": "DV_DATE_TIME",
+      "value": "2026-10-01T07:48:05.689744+00:00"
+    },
+    "setting": {
+      "_type": "DV_CODED_TEXT",
+      "value": "laboratory",
+      "defining_code": {
+        "_type": "CODE_PHRASE",
+        "terminology_id": {
+          "value": "openehr"
+        },
+        "code_string": "261"
+      }
+    },
+    "location": "Nanjangud Primary Health Centre"
+  },
+  "content": [
+    {
+      "_type": "OBSERVATION",
+      "archetype_node_id": "openEHR-EHR-OBSERVATION.laboratory_test_result.v1",
+      "name": {
+        "_type": "DV_TEXT",
+        "value": "Fasting Blood Glucose"
+      },
+      "language": {
+        "_type": "CODE_PHRASE",
+        "terminology_id": {
+          "value": "ISO_639-1"
+        },
+        "code_string": "en"
+      },
+      "encoding": {
+        "_type": "CODE_PHRASE",
+        "terminology_id": {
+          "value": "IANA_character-sets"
+        },
+        "code_string": "UTF-8"
+      },
+      "subject": {
+        "_type": "PARTY_SELF"
+      },
+      "data": {
+        "_type": "HISTORY",
+        "archetype_node_id": "at0001",
+        "name": {
+          "_type": "DV_TEXT",
+          "value": "history"
+        },
+        "origin": {
+          "_type": "DV_DATE_TIME",
+          "value": "2026-10-01T07:48:05.689744+00:00"
+        },
+        "events": [
+          {
+            "_type": "POINT_EVENT",
+            "archetype_node_id": "at0002",
+            "name": {
+              "_type": "DV_TEXT",
+              "value": "Any event"
+            },
+            "time": {
+              "_type": "DV_DATE_TIME",
+              "value": "2026-10-01T07:48:05.689744+00:00"
+            },
+            "data": {
+              "_type": "ITEM_TREE",
+              "archetype_node_id": "at0003",
+              "name": {
+                "_type": "DV_TEXT",
+                "value": "Tree"
+              },
+              "items": [
+                {
+                  "_type": "ELEMENT",
+                  "archetype_node_id": "at0005",
+                  "name": {
+                    "_type": "DV_TEXT",
+                    "value": "Test name"
+                  },
+                  "value": {
+                    "_type": "DV_CODED_TEXT",
+                    "value": "FASTING_BLOOD_GLUCOSE",
+                    "defining_code": {
+                      "_type": "CODE_PHRASE",
+                      "terminology_id": {
+                        "value": "LOINC"
+                      },
+                      "code_string": "1558-6"
+                    }
+                  }
+                },
+                {
+                  "_type": "ELEMENT",
+                  "archetype_node_id": "at0001",
+                  "name": {
+                    "_type": "DV_TEXT",
+                    "value": "Result value"
+                  },
+                  "value": {
+                    "_type": "DV_QUANTITY",
+                    "magnitude": 118.0,
+                    "units": "mg/dL"
+                  }
+                },
+                {
+                  "_type": "ELEMENT",
+                  "archetype_node_id": "at0004",
+                  "name": {
+                    "_type": "DV_TEXT",
+                    "value": "Reference range"
+                  },
+                  "value": {
+                    "_type": "DV_TEXT",
+                    "value": "70 - 99 mg/dL"
+                  }
+                },
+                {
+                  "_type": "ELEMENT",
+                  "archetype_node_id": "at0008",
+                  "name": {
+                    "_type": "DV_TEXT",
+                    "value": "Interpretation"
+                  },
+                  "value": {
+                    "_type": "DV_TEXT",
+                    "value": "ELEVATED"
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "_type": "OBSERVATION",
+      "archetype_node_id": "openEHR-EHR-OBSERVATION.laboratory_test_result.v1",
+      "name": {
+        "_type": "DV_TEXT",
+        "value": "Hba1C"
+      },
+      "language": {
+        "_type": "CODE_PHRASE",
+        "terminology_id": {
+          "value": "ISO_639-1"
+        },
+        "code_string": "en"
+      },
+      "encoding": {
+        "_type": "CODE_PHRASE",
+        "terminology_id": {
+          "value": "IANA_character-sets"
+        },
+        "code_string": "UTF-8"
+      },
+      "subject": {
+        "_type": "PARTY_SELF"
+      },
+      "data": {
+        "_type": "HISTORY",
+        "archetype_node_id": "at0001",
+        "name": {
+          "_type": "DV_TEXT",
+          "value": "history"
+        },
+        "origin": {
+          "_type": "DV_DATE_TIME",
+          "value": "2026-10-01T07:48:05.689744+00:00"
+        },
+        "events": [
+          {
+            "_type": "POINT_EVENT",
+            "archetype_node_id": "at0002",
+            "name": {
+              "_type": "DV_TEXT",
+              "value": "Any event"
+            },
+            "time": {
+              "_type": "DV_DATE_TIME",
+              "value": "2026-10-01T07:48:05.689744+00:00"
+            },
+            "data": {
+              "_type": "ITEM_TREE",
+              "archetype_node_id": "at0003",
+              "name": {
+                "_type": "DV_TEXT",
+                "value": "Tree"
+              },
+              "items": [
+                {
+                  "_type": "ELEMENT",
+                  "archetype_node_id": "at0005",
+                  "name": {
+                    "_type": "DV_TEXT",
+                    "value": "Test name"
+                  },
+                  "value": {
+                    "_type": "DV_CODED_TEXT",
+                    "value": "HBA1C",
+                    "defining_code": {
+                      "_type": "CODE_PHRASE",
+                      "terminology_id": {
+                        "value": "LOINC"
+                      },
+                      "code_string": "4548-4"
+                    }
+                  }
+                },
+                {
+                  "_type": "ELEMENT",
+                  "archetype_node_id": "at0001",
+                  "name": {
+                    "_type": "DV_TEXT",
+                    "value": "Result value"
+                  },
+                  "value": {
+                    "_type": "DV_QUANTITY",
+                    "magnitude": 6.2,
+                    "units": "%"
+                  }
+                },
+                {
+                  "_type": "ELEMENT",
+                  "archetype_node_id": "at0004",
+                  "name": {
+                    "_type": "DV_TEXT",
+                    "value": "Reference range"
+                  },
+                  "value": {
+                    "_type": "DV_TEXT",
+                    "value": "< 5.7 %"
+                  }
+                },
+                {
+                  "_type": "ELEMENT",
+                  "archetype_node_id": "at0008",
+                  "name": {
+                    "_type": "DV_TEXT",
+                    "value": "Interpretation"
+                  },
+                  "value": {
+                    "_type": "DV_TEXT",
+                    "value": "ELEVATED"
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "_type": "OBSERVATION",
+      "archetype_node_id": "openEHR-EHR-OBSERVATION.laboratory_test_result.v1",
+      "name": {
+        "_type": "DV_TEXT",
+        "value": "Triglycerides"
+      },
+      "language": {
+        "_type": "CODE_PHRASE",
+        "terminology_id": {
+          "value": "ISO_639-1"
+        },
+        "code_string": "en"
+      },
+      "encoding": {
+        "_type": "CODE_PHRASE",
+        "terminology_id": {
+          "value": "IANA_character-sets"
+        },
+        "code_string": "UTF-8"
+      },
+      "subject": {
+        "_type": "PARTY_SELF"
+      },
+      "data": {
+        "_type": "HISTORY",
+        "archetype_node_id": "at0001",
+        "name": {
+          "_type": "DV_TEXT",
+          "value": "history"
+        },
+        "origin": {
+          "_type": "DV_DATE_TIME",
+          "value": "2026-10-01T07:48:05.689744+00:00"
+        },
+        "events": [
+          {
+            "_type": "POINT_EVENT",
+            "archetype_node_id": "at0002",
+            "name": {
+              "_type": "DV_TEXT",
+              "value": "Any event"
+            },
+            "time": {
+              "_type": "DV_DATE_TIME",
+              "value": "2026-10-01T07:48:05.689744+00:00"
+            },
+            "data": {
+              "_type": "ITEM_TREE",
+              "archetype_node_id": "at0003",
+              "name": {
+                "_type": "DV_TEXT",
+                "value": "Tree"
+              },
+              "items": [
+                {
+                  "_type": "ELEMENT",
+                  "archetype_node_id": "at0005",
+                  "name": {
+                    "_type": "DV_TEXT",
+                    "value": "Test name"
+                  },
+                  "value": {
+                    "_type": "DV_CODED_TEXT",
+                    "value": "TRIGLYCERIDES",
+                    "defining_code": {
+                      "_type": "CODE_PHRASE",
+                      "terminology_id": {
+                        "value": "LOINC"
+                      },
+                      "code_string": "2571-8"
+                    }
+                  }
+                },
+                {
+                  "_type": "ELEMENT",
+                  "archetype_node_id": "at0001",
+                  "name": {
+                    "_type": "DV_TEXT",
+                    "value": "Result value"
+                  },
+                  "value": {
+                    "_type": "DV_QUANTITY",
+                    "magnitude": 185.0,
+                    "units": "mg/dL"
+                  }
+                },
+                {
+                  "_type": "ELEMENT",
+                  "archetype_node_id": "at0004",
+                  "name": {
+                    "_type": "DV_TEXT",
+                    "value": "Reference range"
+                  },
+                  "value": {
+                    "_type": "DV_TEXT",
+                    "value": "< 150 mg/dL"
+                  }
+                },
+                {
+                  "_type": "ELEMENT",
+                  "archetype_node_id": "at0008",
+                  "name": {
+                    "_type": "DV_TEXT",
+                    "value": "Interpretation"
+                  },
+                  "value": {
+                    "_type": "DV_TEXT",
+                    "value": "ELEVATED"
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

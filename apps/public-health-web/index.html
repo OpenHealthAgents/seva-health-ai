@@ -1,0 +1,1486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SevaHealth AI - Population Health Intelligence Dashboard</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --bg: #090d16;
+      --card-bg: #111827;
+      --card-border: #1f2937;
+      --card-hover: #1e293b;
+      --text-main: #f3f4f6;
+      --text-muted: #9ca3af;
+      --primary: #38bdf8;
+      --primary-dim: #0284c7;
+      --emerald: #10b981;
+      --emerald-dim: #065f46;
+      --amber: #f59e0b;
+      --amber-dim: #78350f;
+      --rose: #ef4444;
+      --rose-dim: #7f1d1d;
+      --indigo: #818cf8;
+      --purple: #a855f7;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Top Navigation Header */
+    header {
+      background-color: #0b1120;
+      border-bottom: 1px solid var(--card-border);
+      padding: 14px 28px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .brand-group {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .brand-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #0284c7, #10b981);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      color: #fff;
+    }
+
+    .brand-titles h1 {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .brand-titles p {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .privacy-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 12px;
+      background: rgba(16, 185, 129, 0.12);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      border-radius: 20px;
+      font-size: 12px;
+      color: #34d399;
+      font-weight: 600;
+    }
+
+    .privacy-badge i {
+      font-size: 13px;
+    }
+
+    .role-badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      background: rgba(56, 189, 248, 0.12);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      border-radius: 20px;
+      font-size: 12px;
+      color: #7dd3fc;
+    }
+
+    .btn-export {
+      background: #1e293b;
+      color: #e2e8f0;
+      border: 1px solid #334155;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s;
+    }
+
+    .btn-export:hover {
+      background: #334155;
+      color: #fff;
+    }
+
+    /* Filters Bar */
+    .filter-bar {
+      background-color: #0f172a;
+      border-bottom: 1px solid var(--card-border);
+      padding: 12px 28px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .filter-group-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .filter-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+    }
+
+    .filter-label {
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    select.filter-select {
+      background: #1e293b;
+      color: #f1f5f9;
+      border: 1px solid #334155;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 13px;
+      outline: none;
+      cursor: pointer;
+    }
+
+    select.filter-select:focus {
+      border-color: var(--primary);
+    }
+
+    /* Tabs Navigation */
+    .nav-tabs {
+      display: flex;
+      gap: 6px;
+      background: #0b1120;
+      padding: 8px 28px 0 28px;
+      border-bottom: 1px solid var(--card-border);
+      overflow-x: auto;
+    }
+
+    .nav-tab {
+      padding: 10px 18px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-muted);
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      white-space: nowrap;
+      transition: all 0.2s;
+    }
+
+    .nav-tab:hover {
+      color: var(--text-main);
+    }
+
+    .nav-tab.active {
+      color: var(--primary);
+      border-bottom: 2px solid var(--primary);
+      background: rgba(56, 189, 248, 0.05);
+    }
+
+    /* Main Content Container */
+    main {
+      flex: 1;
+      padding: 24px 28px;
+      max-width: 1600px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+      animation: fadeIn 0.25s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* KPI Grid */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .kpi-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 18px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .kpi-card::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: var(--primary);
+    }
+
+    .kpi-card.emerald::before { background: var(--emerald); }
+    .kpi-card.amber::before { background: var(--amber); }
+    .kpi-card.rose::before { background: var(--rose); }
+    .kpi-card.purple::before { background: var(--purple); }
+
+    .kpi-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: var(--text-muted);
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+    }
+
+    .kpi-value {
+      font-size: 28px;
+      font-weight: 700;
+      color: #fff;
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+    }
+
+    .kpi-sub {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 6px;
+    }
+
+    /* Layout Grids */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-bottom: 24px;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      margin-bottom: 24px;
+    }
+
+    @media (max-width: 1024px) {
+      .grid-2, .grid-3 {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .panel {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 20px;
+    }
+
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--card-border);
+    }
+
+    .panel-title {
+      font-size: 15px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .panel-badge {
+      font-size: 11px;
+      padding: 4px 8px;
+      border-radius: 6px;
+      background: #1e293b;
+      color: #94a3b8;
+    }
+
+    /* Bar Charts & Distributions */
+    .bar-row {
+      margin-bottom: 14px;
+    }
+
+    .bar-label-group {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      margin-bottom: 4px;
+    }
+
+    .bar-track {
+      background: #1f2937;
+      height: 10px;
+      border-radius: 5px;
+      overflow: hidden;
+      display: flex;
+    }
+
+    .bar-fill {
+      height: 100%;
+      border-radius: 5px;
+    }
+
+    /* Stacked Tier Bar */
+    .tier-bar-track {
+      background: #1f2937;
+      height: 16px;
+      border-radius: 8px;
+      overflow: hidden;
+      display: flex;
+      margin-top: 6px;
+    }
+
+    .tier-seg {
+      height: 100%;
+      transition: width 0.3s;
+    }
+
+    .tier-low { background: #10b981; }
+    .tier-mod { background: #f59e0b; }
+    .tier-high { background: #ef4444; }
+    .tier-crit { background: #7f1d1d; }
+
+    /* Tables */
+    .table-container {
+      overflow-x: auto;
+    }
+
+    table.data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      text-align: left;
+    }
+
+    table.data-table th {
+      background: #0f172a;
+      color: var(--text-muted);
+      font-weight: 600;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--card-border);
+      text-transform: uppercase;
+      font-size: 11px;
+      letter-spacing: 0.5px;
+    }
+
+    table.data-table td {
+      padding: 12px 14px;
+      border-bottom: 1px solid #1e293b;
+      color: #e2e8f0;
+    }
+
+    table.data-table tr:hover td {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .tag-tier {
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      display: inline-block;
+    }
+
+    .tag-high { background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); }
+    .tag-mod { background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); }
+    .tag-low { background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
+    .tag-suppressed { background: rgba(148, 163, 184, 0.15); color: #94a3b8; border: 1px dashed rgba(148, 163, 184, 0.4); font-style: italic; }
+
+    /* Funnel Stages */
+    .funnel-container {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .funnel-step {
+      background: #172033;
+      border: 1px solid #23314d;
+      border-radius: 10px;
+      padding: 14px 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: relative;
+    }
+
+    .funnel-left {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .funnel-num {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: #0284c7;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 12px;
+    }
+
+    .funnel-title {
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .funnel-subtitle {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .funnel-metrics {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      text-align: right;
+    }
+
+    .funnel-val {
+      font-size: 18px;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .funnel-pct {
+      font-size: 12px;
+      color: #38bdf8;
+      font-weight: 600;
+    }
+
+    /* Modal */
+    .modal-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.75);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .modal-backdrop.show {
+      display: flex;
+    }
+
+    .modal-box {
+      background: #0f172a;
+      border: 1px solid #334155;
+      border-radius: 16px;
+      width: 100%;
+      max-width: 900px;
+      max-height: 85vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+    }
+
+    .modal-header {
+      padding: 18px 24px;
+      background: #1e293b;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #334155;
+    }
+
+    .modal-body {
+      padding: 20px 24px;
+      overflow-y: auto;
+      flex: 1;
+    }
+
+    .modal-footer {
+      padding: 14px 24px;
+      background: #1e293b;
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+      border-top: 1px solid #334155;
+    }
+
+    /* Privacy Banner */
+    .privacy-banner {
+      background: rgba(14, 165, 233, 0.08);
+      border: 1px solid rgba(14, 165, 233, 0.25);
+      border-radius: 10px;
+      padding: 12px 18px;
+      margin-bottom: 20px;
+      font-size: 13px;
+      color: #bae6fd;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .privacy-banner i {
+      font-size: 20px;
+      color: #38bdf8;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Navigation Header -->
+  <header>
+    <div class="brand-group">
+      <div class="brand-icon">
+        <i class="fa-solid fa-chart-network"></i>
+      </div>
+      <div class="brand-titles">
+        <h1>SevaHealth Population Intelligence <span style="font-size: 11px; background: #0369a1; padding: 2px 8px; border-radius: 12px; color: #fff;">v2.0-PROD</span></h1>
+        <p>Directorate of Public Health & NCD Surveillance — Govt. of Karnataka</p>
+      </div>
+    </div>
+    <div class="header-actions">
+      <div class="privacy-badge">
+        <i class="fa-solid fa-shield-halved"></i>
+        <span>k-Anonymity Guard (k &ge; 10)</span>
+      </div>
+      <div class="role-badge">
+        <i class="fa-solid fa-user-shield"></i>
+        <span>PUBLIC_HEALTH_ADMIN</span>
+      </div>
+      <button class="btn-export" onclick="openExportModal()">
+        <i class="fa-solid fa-file-arrow-down"></i>
+        <span>De-Identified Export</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Filter Bar -->
+  <div class="filter-bar">
+    <div class="filter-group-row">
+      <div class="filter-item">
+        <span class="filter-label"><i class="fa-solid fa-map-location-dot"></i> State:</span>
+        <strong style="color: #38bdf8;">Karnataka</strong>
+      </div>
+      <div class="filter-item">
+        <span class="filter-label">District:</span>
+        <select class="filter-select" id="filterDistrict" onchange="onFilterChange()">
+          <option value="All">All Districts (5)</option>
+          <option value="Mysuru">Mysuru</option>
+          <option value="Bengaluru Rural">Bengaluru Rural</option>
+          <option value="Mandya">Mandya</option>
+          <option value="Hassan">Hassan</option>
+          <option value="Chamarajanagar">Chamarajanagar</option>
+        </select>
+      </div>
+      <div class="filter-item">
+        <span class="filter-label">Program:</span>
+        <select class="filter-select" id="filterProgram" onchange="onFilterChange()">
+          <option value="All">Karnataka National NCD Mukt Abhiyan</option>
+          <option value="HWCOutreach">Ayushman Bharat HWC Screening</option>
+          <option value="WorkplaceMetabolic">Peri-Urban Workplace Metabolic Audit</option>
+        </select>
+      </div>
+      <div class="filter-item">
+        <span class="filter-label">Age Cohort:</span>
+        <select class="filter-select" id="filterAge" onchange="onFilterChange()">
+          <option value="All">All Age Groups</option>
+          <option value="lt30">&lt; 30 yrs</option>
+          <option value="30_44">30 - 44 yrs</option>
+          <option value="45_59">45 - 59 yrs</option>
+          <option value="60plus">60+ yrs</option>
+        </select>
+      </div>
+      <div class="filter-item">
+        <span class="filter-label">Sex:</span>
+        <select class="filter-select" id="filterSex" onchange="onFilterChange()">
+          <option value="All">All Genders</option>
+          <option value="Male">Male</option>
+          <option value="Female">Female</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+    </div>
+    <div style="font-size: 12px; color: var(--text-muted);">
+      <i class="fa-solid fa-clock-rotate-left"></i> Live Data Refresh: <span id="lastUpdatedTime">Just now</span>
+    </div>
+  </div>
+
+  <!-- Tabs Navigation -->
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="switchTab('overview')">
+      <i class="fa-solid fa-chart-pie"></i> 1. Population Overview
+    </button>
+    <button class="nav-tab" onclick="switchTab('risk-distribution')">
+      <i class="fa-solid fa-heart-pulse"></i> 2. Risk Distribution
+    </button>
+    <button class="nav-tab" onclick="switchTab('risk-trends')">
+      <i class="fa-solid fa-chart-line-up"></i> 3. Risk Trends
+    </button>
+    <button class="nav-tab" onclick="switchTab('high-risk')">
+      <i class="fa-solid fa-triangle-exclamation"></i> 4. High-Risk Cohorts
+    </button>
+    <button class="nav-tab" onclick="switchTab('outcomes')">
+      <i class="fa-solid fa-bullseye-arrow"></i> 5. Intervention Outcomes
+    </button>
+    <button class="nav-tab" onclick="switchTab('referral')">
+      <i class="fa-solid fa-hospital-user"></i> 6. Referral Pipeline
+    </button>
+    <button class="nav-tab" onclick="switchTab('community')">
+      <i class="fa-solid fa-scale-balanced"></i> 7. Community Comparison
+    </button>
+  </div>
+
+  <!-- Main Content -->
+  <main>
+    <!-- Privacy Notice Banner -->
+    <div class="privacy-banner">
+      <i class="fa-solid fa-lock"></i>
+      <div>
+        <strong>Privacy-Preserving Public Health Surveillance:</strong> Minimum aggregation threshold <code>k &ge; 10</code> enforced across all queries. Cohorts with fewer than 10 individuals are suppressed to eliminate patient re-identification risk.
+      </div>
+    </div>
+
+    <!-- TAB 1: POPULATION OVERVIEW -->
+    <div id="tab-overview" class="tab-content active">
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <div class="kpi-header">
+            <span>Target Population</span>
+            <i class="fa-solid fa-users"></i>
+          </div>
+          <div class="kpi-value" id="kpiTargetPop">98,000</div>
+          <div class="kpi-sub">Total registered citizens across monitored taluks</div>
+        </div>
+
+        <div class="kpi-card emerald">
+          <div class="kpi-header">
+            <span>Population Screened</span>
+            <i class="fa-solid fa-clipboard-check"></i>
+          </div>
+          <div class="kpi-value" id="kpiScreened">13,700</div>
+          <div class="kpi-sub"><span id="kpiScreeningRate" style="color: #34d399; font-weight: 600;">14.0%</span> screening coverage completed</div>
+        </div>
+
+        <div class="kpi-card rose">
+          <div class="kpi-header">
+            <span>High-Risk Population</span>
+            <i class="fa-solid fa-bell-exclamation"></i>
+          </div>
+          <div class="kpi-value" id="kpiHighRisk">3,315</div>
+          <div class="kpi-sub"><span id="kpiHighRiskRate" style="color: #f87171; font-weight: 600;">24.2%</span> require priority clinical triage</div>
+        </div>
+
+        <div class="kpi-card amber">
+          <div class="kpi-header">
+            <span>Care Plan Adherence</span>
+            <i class="fa-solid fa-chart-user"></i>
+          </div>
+          <div class="kpi-value" id="kpiAdherence">78.2%</div>
+          <div class="kpi-sub">Active lifestyle &amp; measurement tracking</div>
+        </div>
+
+        <div class="kpi-card purple">
+          <div class="kpi-header">
+            <span>Risk Tier Downgrades</span>
+            <i class="fa-solid fa-arrow-trend-down"></i>
+          </div>
+          <div class="kpi-value" id="kpiImprovements">617</div>
+          <div class="kpi-sub">Citizens transitioned High &rarr; Moderate / Low</div>
+        </div>
+      </div>
+
+      <!-- Domain Breakdown Grid -->
+      <div class="grid-2">
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">
+              <i class="fa-solid fa-virus-covid"></i> Major NCD Prevalence Rates
+            </div>
+            <span class="panel-badge">Karnataka Aggregated</span>
+          </div>
+          <div class="bar-row">
+            <div class="bar-label-group">
+              <span>Hypertension &amp; Vascular Strain</span>
+              <strong id="prevHtn">32.8%</strong>
+            </div>
+            <div class="bar-track">
+              <div class="bar-fill" id="barHtn" style="width: 32.8%; background: #ef4444;"></div>
+            </div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-label-group">
+              <span>Diabetes &amp; Glycemic Strain</span>
+              <strong id="prevDiabetes">27.6%</strong>
+            </div>
+            <div class="bar-track">
+              <div class="bar-fill" id="barDiabetes" style="width: 27.6%; background: #f59e0b;"></div>
+            </div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-label-group">
+              <span>Central Obesity / Visceral Adiposity</span>
+              <strong id="prevObesity">24.7%</strong>
+            </div>
+            <div class="bar-track">
+              <div class="bar-fill" id="barObesity" style="width: 24.7%; background: #818cf8;"></div>
+            </div>
+          </div>
+          <div class="bar-row">
+            <div class="bar-label-group">
+              <span>Cardiovascular 10-Yr Elevated Risk</span>
+              <strong id="prevCvd">16.4%</strong>
+            </div>
+            <div class="bar-track">
+              <div class="bar-fill" id="barCvd" style="width: 16.4%; background: #ec4899;"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">
+              <i class="fa-solid fa-users-viewfinder"></i> Demographic Cohort Distribution (k-Anonymized)
+            </div>
+            <span class="panel-badge">Cell Suppression Guard</span>
+          </div>
+          <div style="margin-bottom: 12px; font-size: 13px; font-weight: 600; color: #94a3b8;">Age Stratification:</div>
+          <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 20px;">
+            <div style="background: #1e293b; padding: 10px; border-radius: 8px; text-align: center;">
+              <div style="font-size: 11px; color: var(--text-muted);">&lt; 30 yrs</div>
+              <div style="font-size: 16px; font-weight: 700; color: #fff;" id="demoAgeLt30">1,918</div>
+            </div>
+            <div style="background: #1e293b; padding: 10px; border-radius: 8px; text-align: center;">
+              <div style="font-size: 11px; color: var(--text-muted);">30-44 yrs</div>
+              <div style="font-size: 16px; font-weight: 700; color: #fff;" id="demoAge3044">4,384</div>
+            </div>
+            <div style="background: #1e293b; padding: 10px; border-radius: 8px; text-align: center;">
+              <div style="font-size: 11px; color: var(--text-muted);">45-59 yrs</div>
+              <div style="font-size: 16px; font-weight: 700; color: #fff;" id="demoAge4559">4,932</div>
+            </div>
+            <div style="background: #1e293b; padding: 10px; border-radius: 8px; text-align: center;">
+              <div style="font-size: 11px; color: var(--text-muted);">60+ yrs</div>
+              <div style="font-size: 16px; font-weight: 700; color: #fff;" id="demoAge60plus">2,466</div>
+            </div>
+          </div>
+
+          <div style="margin-bottom: 10px; font-size: 13px; font-weight: 600; color: #94a3b8;">Gender Breakdown &amp; Suppression Check:</div>
+          <div style="display: flex; gap: 12px; align-items: center;">
+            <div style="flex: 1; background: #1e293b; padding: 10px 14px; border-radius: 8px;">
+              <div style="font-size: 11px; color: var(--text-muted);">MALE</div>
+              <div style="font-size: 16px; font-weight: 700; color: #38bdf8;" id="demoSexMale">6,987 (51.0%)</div>
+            </div>
+            <div style="flex: 1; background: #1e293b; padding: 10px 14px; border-radius: 8px;">
+              <div style="font-size: 11px; color: var(--text-muted);">FEMALE</div>
+              <div style="font-size: 16px; font-weight: 700; color: #f472b6;" id="demoSexFemale">6,644 (48.5%)</div>
+            </div>
+            <div style="flex: 1; background: #1e293b; padding: 10px 14px; border-radius: 8px; border: 1px dashed #475569;">
+              <div style="font-size: 11px; color: var(--text-muted);">OTHER</div>
+              <div style="font-size: 12px; font-weight: 600; color: #94a3b8;" id="demoSexOther">&lt; 10 (Suppressed)</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 2: RISK DISTRIBUTION -->
+    <div id="tab-risk-distribution" class="tab-content">
+      <div class="panel" style="margin-bottom: 24px;">
+        <div class="panel-header">
+          <div class="panel-title">
+            <i class="fa-solid fa-layer-group"></i> Overall Population Risk Stratification
+          </div>
+          <span class="panel-badge">Composite Tiers</span>
+        </div>
+        <div style="display: flex; gap: 24px; margin-bottom: 12px; font-size: 13px;">
+          <div><span style="color: #10b981;">&#9632;</span> Low Risk: <strong id="tierLowVal">5,754 (42%)</strong></div>
+          <div><span style="color: #f59e0b;">&#9632;</span> Moderate Risk: <strong id="tierModVal">4,932 (36%)</strong></div>
+          <div><span style="color: #ef4444;">&#9632;</span> High Risk: <strong id="tierHighVal">2,192 (16%)</strong></div>
+          <div><span style="color: #7f1d1d;">&#9632;</span> Critical / Urgent: <strong id="tierCritVal">822 (6%)</strong></div>
+        </div>
+        <div class="tier-bar-track" style="height: 22px;">
+          <div class="tier-seg tier-low" style="width: 42%;"></div>
+          <div class="tier-seg tier-mod" style="width: 36%;"></div>
+          <div class="tier-seg tier-high" style="width: 16%;"></div>
+          <div class="tier-seg tier-crit" style="width: 6%;"></div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">
+            <i class="fa-solid fa-stethoscope"></i> Multi-Domain Clinical Breakdown
+          </div>
+          <span class="panel-badge">5 NCD Vectors</span>
+        </div>
+        <div class="table-container">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Disease Domain</th>
+                <th>Prevalence Rate</th>
+                <th>Low Tier</th>
+                <th>Moderate Tier</th>
+                <th>High Tier</th>
+                <th>Critical Tier</th>
+                <th>Primary Clinical Driver</th>
+              </tr>
+            </thead>
+            <tbody id="riskDomainsTableBody">
+              <!-- Dynamically populated -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 3: RISK TRENDS -->
+    <div id="tab-risk-trends" class="tab-content">
+      <div class="panel" style="margin-bottom: 24px;">
+        <div class="panel-header">
+          <div class="panel-title">
+            <i class="fa-solid fa-chart-line"></i> Longitudinal 6-Month Epidemiological Progression
+          </div>
+          <span class="panel-badge">May 2026 &mdash; Oct 2026</span>
+        </div>
+        <div class="table-container">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Reporting Period</th>
+                <th>Screened (Cumulative)</th>
+                <th>High-Risk Detected</th>
+                <th>High-Risk %</th>
+                <th>Care Plans Active</th>
+                <th>Mean Adherence %</th>
+                <th>Risk Downgrades</th>
+              </tr>
+            </thead>
+            <tbody id="trendsTableBody">
+              <!-- Dynamically populated -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">
+            <i class="fa-solid fa-lightbulb"></i> Epidemiological Trend Insights
+          </div>
+        </div>
+        <ul id="trendFindingsList" style="list-style: none; display: flex; flex-direction: column; gap: 10px; font-size: 14px;">
+          <!-- Dynamically populated -->
+        </ul>
+      </div>
+    </div>
+
+    <!-- TAB 4: HIGH-RISK COHORTS -->
+    <div id="tab-high-risk" class="tab-content">
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">
+            <i class="fa-solid fa-users-slash"></i> Stratified High-Risk Sub-Populations (k &ge; 10)
+          </div>
+          <span class="panel-badge">Prioritized Outreach</span>
+        </div>
+        <div class="table-container">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Cohort Name</th>
+                <th>Size (k &ge; 10)</th>
+                <th>Prevalence</th>
+                <th>Dominant Demographics</th>
+                <th>Leading Biomarkers</th>
+                <th>Top Lifestyle Contributors</th>
+                <th>Recommended Public Health Action</th>
+              </tr>
+            </thead>
+            <tbody id="highRiskCohortsTableBody">
+              <!-- Dynamically populated -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 5: INTERVENTION OUTCOMES -->
+    <div id="tab-outcomes" class="tab-content">
+      <div class="grid-2">
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">
+              <i class="fa-solid fa-heart-pulse"></i> 90-Day Clinical Biomarker Shift
+            </div>
+            <span class="panel-badge">p &lt; 0.001 Statistically Significant</span>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 18px;">
+            <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 10px; padding: 16px;">
+              <div style="font-size: 12px; color: #34d399; font-weight: 600; text-transform: uppercase;">Systolic BP Reduction (Mean)</div>
+              <div style="font-size: 26px; font-weight: 700; color: #fff; margin: 4px 0;">-11.4 mmHg</div>
+              <div style="font-size: 12px; color: var(--text-muted);">High Adherence Cohort vs +0.8 mmHg in Low Adherence Cohort</div>
+            </div>
+            <div style="background: rgba(56, 189, 248, 0.1); border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 10px; padding: 16px;">
+              <div style="font-size: 12px; color: #7dd3fc; font-weight: 600; text-transform: uppercase;">Fasting Glucose Reduction (Mean)</div>
+              <div style="font-size: 26px; font-weight: 700; color: #fff; margin: 4px 0;">-18.6 mg/dL</div>
+              <div style="font-size: 12px; color: var(--text-muted);">Glycemic stabilization via structured dietary fiber &amp; brisk walking</div>
+            </div>
+            <div style="background: rgba(168, 85, 247, 0.1); border: 1px solid rgba(168, 85, 247, 0.3); border-radius: 10px; padding: 16px;">
+              <div style="font-size: 12px; color: #c084fc; font-weight: 600; text-transform: uppercase;">Verified Risk Tier Downgrades</div>
+              <div style="font-size: 26px; font-weight: 700; color: #fff; margin: 4px 0;">312 Citizens</div>
+              <div style="font-size: 12px; color: var(--text-muted);">Transitioned from High Risk &rarr; Moderate / Low Risk within 90 days</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">
+              <i class="fa-solid fa-code-compare"></i> Cohort Comparison Matrix
+            </div>
+            <span class="panel-badge">N = 2,400 Controlled Cohort</span>
+          </div>
+          <div class="table-container">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Outcome Indicator</th>
+                  <th>High Adherence (&ge; 75%)</th>
+                  <th>Low Adherence (&lt; 50%)</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Sample Size</td>
+                  <td><strong>1,420 citizens</strong></td>
+                  <td>980 citizens</td>
+                </tr>
+                <tr>
+                  <td>Mean Systolic BP Change</td>
+                  <td><strong style="color: #34d399;">-11.4 mmHg</strong></td>
+                  <td style="color: #f87171;">+0.8 mmHg</td>
+                </tr>
+                <tr>
+                  <td>Mean Fasting Glucose Change</td>
+                  <td><strong style="color: #34d399;">-18.6 mg/dL</strong></td>
+                  <td style="color: #f87171;">+3.2 mg/dL</td>
+                </tr>
+                <tr>
+                  <td>Risk Tier Downgrades</td>
+                  <td><strong style="color: #34d399;">312 (22.0%)</strong></td>
+                  <td style="color: #94a3b8;">14 (1.4%)</td>
+                </tr>
+                <tr>
+                  <td>Clinical Interpretation</td>
+                  <td colspan="2" style="font-size: 12px; color: #93c5fd; padding-top: 14px;">
+                    Daily digital habit compliance and micro-walk tracking produces statistically significant risk regression (p &lt; 0.001).
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 6: REFERRAL PIPELINE -->
+    <div id="tab-referral" class="tab-content">
+      <div class="panel" style="margin-bottom: 24px;">
+        <div class="panel-header">
+          <div class="panel-title">
+            <i class="fa-solid fa-filter"></i> Closed-Loop Public Health Referral Pipeline
+          </div>
+          <span class="panel-badge">Total Referrals: 1,840</span>
+        </div>
+        <div class="funnel-container" id="funnelContainer">
+          <!-- Dynamically populated -->
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">
+              <i class="fa-solid fa-hospital"></i> Referral Destinations by Facility Tier
+            </div>
+          </div>
+          <div id="facilityBreakdownContainer" style="display: flex; flex-direction: column; gap: 12px;">
+            <!-- Dynamically populated -->
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">
+              <i class="fa-solid fa-triangle-exclamation"></i> Identified Operational Bottlenecks
+            </div>
+          </div>
+          <ul id="bottlenecksList" style="list-style: none; display: flex; flex-direction: column; gap: 10px; font-size: 13px;">
+            <!-- Dynamically populated -->
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 7: COMMUNITY COMPARISON -->
+    <div id="tab-community" class="tab-content">
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">
+            <i class="fa-solid fa-ranking-star"></i> Cross-District Ayushman Bharat Performance Index
+          </div>
+          <span class="panel-badge">State Benchmarking</span>
+        </div>
+        <div class="table-container">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>District / Community</th>
+                <th>Target Pop</th>
+                <th>Screened</th>
+                <th>Coverage %</th>
+                <th>High Risk %</th>
+                <th>Diabetes %</th>
+                <th>HTN %</th>
+                <th>Adherence %</th>
+                <th>Referral Close %</th>
+                <th>Status Tier</th>
+              </tr>
+            </thead>
+            <tbody id="communityTableBody">
+              <!-- Dynamically populated -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- De-Identified Export Modal -->
+  <div id="exportModal" class="modal-backdrop">
+    <div class="modal-box">
+      <div class="modal-header">
+        <div style="font-size: 16px; font-weight: 700; display: flex; align-items: center; gap: 10px;">
+          <i class="fa-solid fa-shield-halved" style="color: #38bdf8;"></i>
+          <span>De-Identified Public Health Research Microdata Export</span>
+        </div>
+        <button onclick="closeExportModal()" style="background: none; border: none; color: #94a3b8; font-size: 18px; cursor: pointer;">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="privacy-banner" style="margin-bottom: 14px;">
+          <i class="fa-solid fa-fingerprint"></i>
+          <div>
+            <strong>Pseudonymization Protocol:</strong> All citizen identifiers are converted via <code>Salted SHA-256</code> one-way cryptographic hashing. Ages are banded into 5-year intervals, and clinical measurements are categorical ranges.
+          </div>
+        </div>
+        <div class="table-container" style="max-height: 400px; overflow-y: auto;">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Pseudonym ID</th>
+                <th>Age Group</th>
+                <th>Sex</th>
+                <th>District</th>
+                <th>Risk Tier</th>
+                <th>Blood Pressure</th>
+                <th>Blood Glucose</th>
+                <th>BMI Band</th>
+                <th>Adherence</th>
+              </tr>
+            </thead>
+            <tbody id="exportTableBody">
+              <!-- Dynamically populated -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-export" style="background: #334155;" onclick="closeExportModal()">Close</button>
+        <button class="btn-export" style="background: #0284c7; color: #fff;" onclick="downloadCSV()">
+          <i class="fa-solid fa-download"></i> Download CSV (.csv)
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Global State & Data Cache
+    let currentTab = 'overview';
+    let currentDistrict = 'All';
+    let exportRecords = [];
+
+    // Switch Tabs
+    function switchTab(tabId) {
+      document.querySelectorAll('.nav-tab').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+
+      const targetTab = document.getElementById('tab-' + tabId);
+      if (targetTab) {
+        targetTab.classList.add('active');
+      }
+
+      const activeBtn = Array.from(document.querySelectorAll('.nav-tab')).find(b => b.getAttribute('onclick').includes(tabId));
+      if (activeBtn) activeBtn.classList.add('active');
+
+      currentTab = tabId;
+      loadTabData(tabId);
+    }
+
+    // Filter Change Handler
+    function onFilterChange() {
+      currentDistrict = document.getElementById('filterDistrict').value;
+      loadTabData(currentTab);
+    }
+
+    // Load Data based on Active Tab
+    async function loadTabData(tabId) {
+      try {
+        if (tabId === 'overview') await loadOverview();
+        else if (tabId === 'risk-distribution') await loadRiskDistribution();
+        else if (tabId === 'risk-trends') await loadRiskTrends();
+        else if (tabId === 'high-risk') await loadHighRisk();
+        else if (tabId === 'referral') await loadReferral();
+        else if (tabId === 'community') await loadCommunity();
+      } catch (err) {
+        console.error("Failed to load tab data", err);
+      }
+    }
+
+    // 1. Overview API
+    async function loadOverview() {
+      const q = currentDistrict !== 'All' ? `?district=${encodeURIComponent(currentDistrict)}` : '';
+      const res = await fetch(`/api/v1/population/overview${q}`);
+      if (!res.ok) return;
+      const data = await res.json();
+
+      document.getElementById('kpiTargetPop').textContent = data.total_target_population.toLocaleString();
+      document.getElementById('kpiScreened').textContent = data.population_screened.toLocaleString();
+      document.getElementById('kpiScreeningRate').textContent = data.screening_completion_rate_pct.toFixed(1) + '%';
+      document.getElementById('kpiHighRisk').textContent = data.high_risk_population.toLocaleString();
+      document.getElementById('kpiHighRiskRate').textContent = data.high_risk_percentage.toFixed(1) + '%';
+      document.getElementById('kpiAdherence').textContent = data.intervention_adherence_mean_pct.toFixed(1) + '%';
+      document.getElementById('kpiImprovements').textContent = data.risk_improvement_count.toLocaleString();
+
+      document.getElementById('prevHtn').textContent = data.hypertension_risk_prevalence_pct.toFixed(1) + '%';
+      document.getElementById('barHtn').style.width = data.hypertension_risk_prevalence_pct + '%';
+
+      document.getElementById('prevDiabetes').textContent = data.diabetes_risk_prevalence_pct.toFixed(1) + '%';
+      document.getElementById('barDiabetes').style.width = data.diabetes_risk_prevalence_pct + '%';
+
+      document.getElementById('prevObesity').textContent = data.obesity_risk_prevalence_pct.toFixed(1) + '%';
+      document.getElementById('barObesity').style.width = data.obesity_risk_prevalence_pct + '%';
+
+      document.getElementById('prevCvd').textContent = data.cardiovascular_risk_prevalence_pct.toFixed(1) + '%';
+      document.getElementById('barCvd').style.width = data.cardiovascular_risk_prevalence_pct + '%';
+
+      // Demographics & Cell Suppression Check
+      if (data.demographic_summary && data.demographic_summary.age_groups) {
+        const ages = data.demographic_summary.age_groups;
+        if (ages['< 30 yrs']) document.getElementById('demoAgeLt30').textContent = ages['< 30 yrs'].toLocaleString();
+        if (ages['30-44 yrs']) document.getElementById('demoAge3044').textContent = ages['30-44 yrs'].toLocaleString();
+        if (ages['45-59 yrs']) document.getElementById('demoAge4559').textContent = ages['45-59 yrs'].toLocaleString();
+        if (ages['60+ yrs']) document.getElementById('demoAge60plus').textContent = ages['60+ yrs'].toLocaleString();
+      }
+
+      if (data.demographic_summary && data.demographic_summary.sex) {
+        const sex = data.demographic_summary.sex;
+        if (sex['MALE']) document.getElementById('demoSexMale').textContent = sex['MALE'].toLocaleString();
+        if (sex['FEMALE']) document.getElementById('demoSexFemale').textContent = sex['FEMALE'].toLocaleString();
+        // Demonstrate Cell Suppression indicator if < 10
+        if (sex['OTHER'] === null || sex['OTHER'] === undefined) {
+          document.getElementById('demoSexOther').innerHTML = '<span class="tag-tier tag-suppressed">&lt; 10 (Suppressed for Privacy)</span>';
+        } else {
+          document.getElementById('demoSexOther').textContent = sex['OTHER'];
+        }
+      }
+    }
+
+    // 2. Risk Distribution API
+    async function loadRiskDistribution() {
+      const q = currentDistrict !== 'All' ? `?district=${encodeURIComponent(currentDistrict)}` : '';
+      const res = await fetch(`/api/v1/population/risk-distribution${q}`);
+      if (!res.ok) return;
+      const data = await res.json();
+
+      const tbody = document.getElementById('riskDomainsTableBody');
+      tbody.innerHTML = '';
+      data.domains.forEach(d => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><strong>${d.domain_name}</strong></td>
+          <td><strong style="color: #38bdf8;">${d.prevalence_rate_pct.toFixed(1)}%</strong></td>
+          <td><span class="tag-tier tag-low">${d.low_count.toLocaleString()}</span></td>
+          <td><span class="tag-tier tag-mod">${d.moderate_count.toLocaleString()}</span></td>
+          <td><span class="tag-tier tag-high">${d.high_count.toLocaleString()}</span></td>
+          <td><span class="tag-tier" style="background: rgba(127, 29, 29, 0.4); color: #fca5a5;">${d.critical_count.toLocaleString()}</span></td>
+          <td style="font-size: 12px; color: #94a3b8;">${d.leading_risk_driver}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // 3. Risk Trends API
+    async function loadRiskTrends() {
+      const q = currentDistrict !== 'All' ? `?district=${encodeURIComponent(currentDistrict)}` : '';
+      const res = await fetch(`/api/v1/population/risk-trends${q}`);
+      if (!res.ok) return;
+      const data = await res.json();
+
+      const tbody = document.getElementById('trendsTableBody');
+      tbody.innerHTML = '';
+      data.monthly_trends.forEach(t => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><strong>${t.period}</strong></td>
+          <td>${t.screened_cumulative.toLocaleString()}</td>
+          <td style="color: #f87171;">${t.high_risk_detected.toLocaleString()}</td>
+          <td><strong>${t.high_risk_pct.toFixed(1)}%</strong></td>
+          <td>${t.care_plans_activated.toLocaleString()}</td>
+          <td style="color: #34d399;">${t.mean_adherence_pct.toFixed(1)}%</td>
+          <td style="color: #38bdf8; font-weight: 700;">+${t.risk_tier_downgrades}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      const list = document.getElementById('trendFindingsList');
+      list.innerHTML = '';
+      data.key_findings.forEach(f => {
+        const li = document.createElement('li');
+        li.innerHTML = `<i class="fa-solid fa-circle-check" style="color: #10b981; margin-right: 8px;"></i> ${f}`;
+        list.appendChild(li);
+      });
+    }
+
+    // 4. High Risk Cohorts API
+    async function loadHighRisk() {
+      const q = currentDistrict !== 'All' ? `?district=${encodeURIComponent(currentDistrict)}` : '';
+      const res = await fetch(`/api/v1/population/high-risk-cohorts${q}`);
+      if (!res.ok) return;
+      const data = await res.json();
+
+      const tbody = document.getElementById('highRiskCohortsTableBody');
+      tbody.innerHTML = '';
+      data.cohorts.forEach(c => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><strong>${c.cohort_name}</strong></td>
+          <td><span class="tag-tier tag-high">${c.size.toLocaleString()}</span></td>
+          <td>${c.prevalence_pct.toFixed(1)}%</td>
+          <td style="font-size: 12px; color: #cbd5e1;">${c.dominant_demographics}</td>
+          <td style="font-size: 12px; color: #f87171;">${c.leading_biomarkers.join(', ')}</td>
+          <td style="font-size: 12px; color: #fbbf24;">${c.top_lifestyle_contributors.join(', ')}</td>
+          <td style="font-size: 12px; color: #7dd3fc;">${c.suggested_public_health_intervention}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // 6. Referral Pipeline API
+    async function loadReferral() {
+      const res = await fetch('/api/v1/population/referral-pipeline');
+      if (!res.ok) return;
+      const data = await res.json();
+
+      const funnelContainer = document.getElementById('funnelContainer');
+      funnelContainer.innerHTML = '';
+      data.funnel_stages.forEach((s, idx) => {
+        const step = document.createElement('div');
+        step.className = 'funnel-step';
+        step.innerHTML = `
+          <div class="funnel-left">
+            <div class="funnel-num">${idx + 1}</div>
+            <div>
+              <div class="funnel-title">${s.stage_name}</div>
+              <div class="funnel-subtitle">Average Turnaround: ${s.average_lag_days.toFixed(1)} days</div>
+            </div>
+          </div>
+          <div class="funnel-metrics">
+            <div class="funnel-val">${s.count.toLocaleString()}</div>
+            <div class="funnel-pct">${s.conversion_rate_pct.toFixed(1)}% conversion</div>
+          </div>
+        `;
+        funnelContainer.appendChild(step);
+      });
+
+      const facilityContainer = document.getElementById('facilityBreakdownContainer');
+      facilityContainer.innerHTML = '';
+      data.facility_breakdown.forEach(f => {
+        const div = document.createElement('div');
+        div.style.cssText = 'background: #1e293b; padding: 12px 16px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; font-size: 13px;';
+        div.innerHTML = `
+          <div>
+            <strong>${f.tier}</strong>
+            <div style="font-size: 11px; color: #94a3b8;">${f.facilities} Facilities (${f.percentage}%)</div>
+          </div>
+          <div style="font-size: 16px; font-weight: 700; color: #38bdf8;">${f.active_referrals}</div>
+        `;
+        facilityContainer.appendChild(div);
+      });
+
+      const bottlenecksList = document.getElementById('bottlenecksList');
+      bottlenecksList.innerHTML = '';
+      data.pipeline_bottlenecks.forEach(b => {
+        const li = document.createElement('li');
+        li.innerHTML = `<i class="fa-solid fa-triangle-exclamation" style="color: #f59e0b; margin-right: 8px;"></i> ${b}`;
+        bottlenecksList.appendChild(li);
+      });
+    }
+
+    // 7. Community Comparison API
+    async function loadCommunity() {
+      const res = await fetch('/api/v1/population/community-comparison');
+      if (!res.ok) return;
+      const data = await res.json();
+
+      const tbody = document.getElementById('communityTableBody');
+      tbody.innerHTML = '';
+      data.communities.forEach(c => {
+        const tr = document.createElement('tr');
+        const badgeClass = c.performance_tier === 'HIGH_PERFORMING' ? 'tag-low' : (c.performance_tier === 'AVERAGE' ? 'tag-mod' : 'tag-high');
+        tr.innerHTML = `
+          <td><strong>${c.community_name}</strong></td>
+          <td>${c.target_population.toLocaleString()}</td>
+          <td>${c.screened_population.toLocaleString()}</td>
+          <td><strong>${c.screening_completion_pct.toFixed(1)}%</strong></td>
+          <td style="color: #f87171;">${c.high_risk_pct.toFixed(1)}%</td>
+          <td>${c.diabetes_prevalence_pct.toFixed(1)}%</td>
+          <td>${c.hypertension_prevalence_pct.toFixed(1)}%</td>
+          <td style="color: #34d399;">${c.care_plan_adherence_pct.toFixed(1)}%</td>
+          <td style="color: #38bdf8;">${c.referral_completion_pct.toFixed(1)}%</td>
+          <td><span class="tag-tier ${badgeClass}">${c.performance_tier}</span></td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // De-Identified Export Modal
+    async function openExportModal() {
+      document.getElementById('exportModal').classList.add('show');
+      try {
+        const res = await fetch('/api/v1/population/deidentified-export?limit=30');
+        if (!res.ok) return;
+        const data = await res.json();
+        exportRecords = data.records;
+
+        const tbody = document.getElementById('exportTableBody');
+        tbody.innerHTML = '';
+        data.records.forEach(r => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td><code style="color: #38bdf8; font-size: 11px;">${r.pseudonym_id.slice(0, 14)}...</code></td>
+            <td>${r.age_group}</td>
+            <td>${r.sex}</td>
+            <td>${r.district}</td>
+            <td><span class="tag-tier ${r.composite_risk_tier === 'HIGH' ? 'tag-high' : (r.composite_risk_tier === 'MODERATE' ? 'tag-mod' : 'tag-low')}">${r.composite_risk_tier}</span></td>
+            <td style="font-size: 11px;">${r.blood_pressure_category}</td>
+            <td style="font-size: 11px;">${r.glucose_category}</td>
+            <td style="font-size: 11px;">${r.bmi_category}</td>
+            <td style="font-size: 11px;">${r.adherence_tier}</td>
+          `;
+          tbody.appendChild(tr);
+        });
+      } catch (err) {
+        console.error("Export modal load failed", err);
+      }
+    }
+
+    function closeExportModal() {
+      document.getElementById('exportModal').classList.remove('show');
+    }
+
+    function downloadCSV() {
+      if (!exportRecords.length) return;
+      const headers = ["Pseudonym_ID", "Age_Group", "Sex", "District", "Risk_Tier", "Blood_Pressure_Category", "Glucose_Category", "BMI_Category", "Adherence_Tier"];
+      const rows = exportRecords.map(r => [
+        r.pseudonym_id,
+        r.age_group,
+        r.sex,
+        r.district,
+        r.composite_risk_tier,
+        `"${r.blood_pressure_category}"`,
+        `"${r.glucose_category}"`,
+        `"${r.bmi_category}"`,
+        `"${r.adherence_tier}"`
+      ]);
+
+      const csvContent = "data:text/csv;charset=utf-8," + [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement("a");
+      link.setAttribute("href", encodedUri);
+      link.setAttribute("download", `sevahealth_deidentified_population_cohort_${new Date().toISOString().slice(0,10)}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    // Initialize on page load
+    document.addEventListener('DOMContentLoaded', () => {
+      loadOverview();
+    });
+  </script>
+</body>
+</html>

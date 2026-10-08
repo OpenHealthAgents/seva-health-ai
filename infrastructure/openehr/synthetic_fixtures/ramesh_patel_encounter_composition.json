@@ -1,0 +1,163 @@
+{
+  "_type": "COMPOSITION",
+  "name": {
+    "_type": "DV_TEXT",
+    "value": "Clinical Consultation: Evaluation of prediabetes and borderline vascular strain"
+  },
+  "archetype_node_id": "openEHR-EHR-COMPOSITION.encounter.v1",
+  "archetype_details": {
+    "archetype_id": {
+      "value": "openEHR-EHR-COMPOSITION.encounter.v1"
+    },
+    "template_id": {
+      "value": "SevaHealth_Encounter_SOAP_v1"
+    },
+    "rm_version": "1.0.4"
+  },
+  "language": {
+    "_type": "CODE_PHRASE",
+    "terminology_id": {
+      "value": "ISO_639-1"
+    },
+    "code_string": "en"
+  },
+  "territory": {
+    "_type": "CODE_PHRASE",
+    "terminology_id": {
+      "value": "ISO_3166-1"
+    },
+    "code_string": "IN"
+  },
+  "category": {
+    "_type": "DV_CODED_TEXT",
+    "value": "event",
+    "defining_code": {
+      "_type": "CODE_PHRASE",
+      "terminology_id": {
+        "value": "openehr"
+      },
+      "code_string": "433"
+    }
+  },
+  "composer": {
+    "_type": "PARTY_IDENTIFIED",
+    "name": "Dr. Anand Kulkarni, MD"
+  },
+  "context": {
+    "_type": "EVENT_CONTEXT",
+    "start_time": {
+      "_type": "DV_DATE_TIME",
+      "value": "2026-10-01T07:48:05.689744+00:00"
+    },
+    "end_time": {
+      "_type": "DV_DATE_TIME",
+      "value": "2026-10-01T08:08:05.689744+00:00"
+    },
+    "setting": {
+      "_type": "DV_CODED_TEXT",
+      "value": "primary medical care",
+      "defining_code": {
+        "_type": "CODE_PHRASE",
+        "terminology_id": {
+          "value": "openehr"
+        },
+        "code_string": "228"
+      }
+    }
+  },
+  "content": [
+    {
+      "_type": "SECTION",
+      "archetype_node_id": "openEHR-EHR-SECTION.soap.v1",
+      "name": {
+        "_type": "DV_TEXT",
+        "value": "SOAP Clinical Notes"
+      },
+      "items": [
+        {
+          "_type": "EVALUATION",
+          "archetype_node_id": "openEHR-EHR-EVALUATION.reason_for_encounter.v1",
+          "name": {
+            "_type": "DV_TEXT",
+            "value": "Reason for encounter"
+          },
+          "language": {
+            "_type": "CODE_PHRASE",
+            "terminology_id": {
+              "value": "ISO_639-1"
+            },
+            "code_string": "en"
+          },
+          "encoding": {
+            "_type": "CODE_PHRASE",
+            "terminology_id": {
+              "value": "IANA_character-sets"
+            },
+            "code_string": "UTF-8"
+          },
+          "subject": {
+            "_type": "PARTY_SELF"
+          },
+          "data": {
+            "_type": "ITEM_TREE",
+            "archetype_node_id": "at0001",
+            "name": {
+              "_type": "DV_TEXT",
+              "value": "Tree"
+            },
+            "items": [
+              {
+                "_type": "ELEMENT",
+                "archetype_node_id": "at0002",
+                "name": {
+                  "_type": "DV_TEXT",
+                  "value": "Subjective"
+                },
+                "value": {
+                  "_type": "DV_TEXT",
+                  "value": "48yo male screened with high IDRS (60/100). Reports occasional postprandial fatigue. Denies chest pain or exertional dyspnea."
+                }
+              },
+              {
+                "_type": "ELEMENT",
+                "archetype_node_id": "at0003",
+                "name": {
+                  "_type": "DV_TEXT",
+                  "value": "Objective"
+                },
+                "value": {
+                  "_type": "DV_TEXT",
+                  "value": "BP 138/88 mmHg. Fasting blood sugar 118 mg/dL, HbA1c 6.2%, Waist 96 cm, BMI 27.2 kg/m2."
+                }
+              },
+              {
+                "_type": "ELEMENT",
+                "archetype_node_id": "at0004",
+                "name": {
+                  "_type": "DV_TEXT",
+                  "value": "Assessment"
+                },
+                "value": {
+                  "_type": "DV_TEXT",
+                  "value": "Impaired Fasting Glycemia (Prediabetes) and Prehypertension with Asian Indian central adiposity."
+                }
+              },
+              {
+                "_type": "ELEMENT",
+                "archetype_node_id": "at0005",
+                "name": {
+                  "_type": "DV_TEXT",
+                  "value": "Plan"
+                },
+                "value": {
+                  "_type": "DV_TEXT",
+                  "value": "1. Structured 30-day glycemic stabilization care plan. 2. Foxtail millet substitution. 3. 20-minute post-dinner brisk walk. 4. Re-check FBG in 30 days."
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

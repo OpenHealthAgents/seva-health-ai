@@ -1,0 +1,199 @@
+from typing import Dict, Any, List, Optional
+from fastapi import APIRouter, HTTPException, Depends
+from pydantic import BaseModel
+
+from packages.auth.jwt import get_current_user_token, TokenPayload
+from packages.ai_schemas.schemas import LLMRiskExplanationOutput, LLMSOAPSummaryOutput
+from services.ai_agent.provider import get_ai_provider
+from services.ai_agent.safety import ClinicalSafetyEnforcer
+from services.ai_agent.tools import agent_telemetry
+from services.ai_agent.prevention_agent import (
+    prevention_agent,
+    PreventionAgentResponse,
+)
+from services.store import store
+
+router = APIRouter(prefix="/ai", tags=["AI Agent Runtime & Safety"])
+
+
+class ChatExplanationRequest(BaseModel):
+    citizen_id: str
+    user_question: str
+
+
+class PreventionAgentChatRequest(BaseModel):
+    citizen_id: str
+    query: str
+    language: str = "en"
+
+
+@router.post("/explain/{citizen_id}", response_model=LLMRiskExplanationOutput)
+async def explain_risk_with_ai(
+    citizen_id: str,
+    current_user: TokenPayload = Depends(get_current_user_token),
+):
+    citizen = store.get_citizen(citizen_id)
+    if not citizen:
+        raise HTTPException(status_code=404, detail="Citizen not found")
+
+    risk = store.get_latest_risk(citizen_id)
+    score = risk.overall_score if risk else 0.50
+
+    provider = get_ai_provider()
+    output = await provider.explain_risk(
+        citizen_name=f"{citizen.first_name} {citizen.last_name}",
+        vitals_summary="Biometrics assessed against ICMR standards.",
+        risk_score=score,
+    )
+
+    # Enforce safety check
+    is_safe, sanitized_summary = ClinicalSafetyEnforcer.audit_ai_response(output.plain_summary)
+    output.plain_summary = sanitized_summary
+
+    return output
+
+
+@router.post("/prevention-agent/chat", response_model=PreventionAgentResponse)
+async def chat_with_prevention_agent(
+    payload: PreventionAgentChatRequest,
+    current_user: TokenPayload = Depends(get_current_user_token),
+):
+    """Processes conversational preventive health interactions with grounded data retrieval and bounded clinical safety."""
+    citizen = store.get_citizen(payload.citizen_id)
+    if not citizen:
+        raise HTTPException(status_code=404, detail=f"Citizen '{payload.citizen_id}' not found")
+
+    try:
+        response = await prevention_agent.chat(
+            citizen_id=payload.citizen_id,
+            user_query=payload.query,
+            actor=current_user,
+            language=payload.language,
+        )
+        return response
+    except PermissionError as pe:
+        raise HTTPException(status_code=403, detail=str(pe))
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Agent runtime error: {str(exc)}")
+
+
+@router.post("/prevention-agent/summarize-clinician/{citizen_id}", response_model=LLMSOAPSummaryOutput)
+async def summarize_for_clinician(
+    citizen_id: str,
+    current_user: TokenPayload = Depends(get_current_user_token),
+):
+    """Generates structured longitudinal SOAP clinical summary for attending physician review."""
+    citizen = store.get_citizen(citizen_id)
+    if not citizen:
+        raise HTTPException(status_code=404, detail=f"Citizen '{citizen_id}' not found")
+
+    try:
+        summary = await prevention_agent.summarize_for_clinician(
+            citizen_id=citizen_id,
+            actor=current_user,
+        )
+        return summary
+    except PermissionError as pe:
+        raise HTTPException(status_code=403, detail=str(pe))
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Agent runtime error: {str(exc)}")
+
+
+@router.get("/prevention-agent/tools")
+def list_prevention_agent_tools():
+    """Lists available authorized tools, descriptions, and grounding data sources."""
+    return {
+        "tools": [
+            {
+                "name": "get_patient_profile",
+                "description": "Retrieves demographic and geographical context for the patient.",
+                "source": "PostgreSQL Citizen Demographics",
+                "auth_required": True,
+            },
+            {
+                "name": "get_latest_vitals",
+                "description": "Retrieves latest blood pressure, BMI, waist circumference, and heart rate observations.",
+                "source": "openEHR / PostgreSQL Clinical Observations",
+                "auth_required": True,
+            },
+            {
+                "name": "get_recent_labs",
+                "description": "Retrieves laboratory diagnostic markers including fasting glucose, HbA1c, and lipid profile.",
+                "source": "openEHR Diagnostic Labs",
+                "auth_required": True,
+            },
+            {
+                "name": "get_risk_assessment",
+                "description": "Retrieves composite NCD risk assessment, domain scores, and SHAP-style factor contributions.",
+                "source": "SevaHealth NCD Risk Engine",
+                "auth_required": True,
+            },
+            {
+                "name": "get_risk_trajectory",
+                "description": "Retrieves longitudinal trajectory comparison (current vs previous vs baseline) with non-causal attribution.",
+                "source": "SevaHealth Longitudinal Trajectory Engine",
+                "auth_required": True,
+            },
+            {
+                "name": "get_intervention_plan",
+                "description": "Retrieves active 30-day prevention care plan, tasks, and adherence rate.",
+                "source": "SevaHealth Prevention Intervention Engine",
+                "auth_required": True,
+            },
+            {
+                "name": "get_wearable_summary",
+                "description": "Retrieves 7-day rolling baselines for resting HR, HRV, and daily steps from smartwatches.",
+                "source": "Open Wearables Ingestion Layer",
+                "auth_required": True,
+            },
+            {
+                "name": "get_medication_list",
+                "description": "Retrieves active prescribed medications with strict non-alteration safety boundary.",
+                "source": "Clinical Medication Store",
+                "auth_required": True,
+            },
+            {
+                "name": "get_clinical_history",
+                "description": "Retrieves past screening sessions, encounters, and clinician notes.",
+                "source": "Clinical History Repository",
+                "auth_required": True,
+            },
+            {
+                "name": "create_checkin",
+                "description": "Records citizen daily prevention micro-habit check-in.",
+                "source": "Intervention Tracking Store",
+                "auth_required": True,
+            },
+            {
+                "name": "create_followup",
+                "description": "Schedules routine or targeted follow-up with ASHA worker or PHC.",
+                "source": "Care Coordination System",
+                "auth_required": True,
+            },
+            {
+                "name": "create_alert",
+                "description": "Generates priority or emergency clinical alert for red-flag biometrics.",
+                "source": "Clinical Alerting Service",
+                "auth_required": True,
+            },
+            {
+                "name": "request_clinician_review",
+                "description": "Escalates patient context to clinician triage review queue.",
+                "source": "Primary Care Triage Service",
+                "auth_required": True,
+            },
+        ]
+    }
+
+
+@router.get("/prevention-agent/logs/{citizen_id}")
+def get_agent_audit_logs(
+    citizen_id: str,
+    current_user: TokenPayload = Depends(get_current_user_token),
+):
+    """Retrieves forensic audit trail of all agent decisions and executed tool calls for a citizen."""
+    citizen = store.get_citizen(citizen_id)
+    if not citizen:
+        raise HTTPException(status_code=404, detail="Citizen not found")
+    logs = agent_telemetry.get_logs_for_citizen(citizen_id)
+    return {"citizen_id": citizen_id, "total_events": len(logs), "events": logs}

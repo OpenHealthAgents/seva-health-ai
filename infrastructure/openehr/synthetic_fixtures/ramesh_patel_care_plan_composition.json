@@ -1,0 +1,95 @@
+{
+  "_type": "COMPOSITION",
+  "name": {
+    "_type": "DV_TEXT",
+    "value": "SevaHealth 30-Day Glycemic Stabilization Journey"
+  },
+  "archetype_node_id": "openEHR-EHR-COMPOSITION.care_plan.v1",
+  "archetype_details": {
+    "archetype_id": {
+      "value": "openEHR-EHR-COMPOSITION.care_plan.v1"
+    },
+    "template_id": {
+      "value": "SevaHealth_Care_Plan_v1"
+    },
+    "rm_version": "1.0.4"
+  },
+  "language": {
+    "_type": "CODE_PHRASE",
+    "terminology_id": {
+      "value": "ISO_639-1"
+    },
+    "code_string": "en"
+  },
+  "territory": {
+    "_type": "CODE_PHRASE",
+    "terminology_id": {
+      "value": "ISO_3166-1"
+    },
+    "code_string": "IN"
+  },
+  "category": {
+    "_type": "DV_CODED_TEXT",
+    "value": "persistent",
+    "defining_code": {
+      "_type": "CODE_PHRASE",
+      "terminology_id": {
+        "value": "openehr"
+      },
+      "code_string": "431"
+    }
+  },
+  "composer": {
+    "_type": "PARTY_IDENTIFIED",
+    "name": "Dr. Anand Kulkarni, MD"
+  },
+  "context": {
+    "_type": "EVENT_CONTEXT",
+    "start_time": {
+      "_type": "DV_DATE_TIME",
+      "value": "2026-10-08T07:48:05.691412+00:00"
+    },
+    "setting": {
+      "_type": "DV_CODED_TEXT",
+      "value": "other care",
+      "defining_code": {
+        "_type": "CODE_PHRASE",
+        "terminology_id": {
+          "value": "openehr"
+        },
+        "code_string": "238"
+      }
+    }
+  },
+  "content": [
+    {
+      "_type": "INSTRUCTION",
+      "archetype_node_id": "openEHR-EHR-INSTRUCTION.care_plan.v1",
+      "name": {
+        "_type": "DV_TEXT",
+        "value": "Care Plan Protocol"
+      },
+      "language": {
+        "_type": "CODE_PHRASE",
+        "terminology_id": {
+          "value": "ISO_639-1"
+        },
+        "code_string": "en"
+      },
+      "encoding": {
+        "_type": "CODE_PHRASE",
+        "terminology_id": {
+          "value": "IANA_character-sets"
+        },
+        "code_string": "UTF-8"
+      },
+      "subject": {
+        "_type": "PARTY_SELF"
+      },
+      "narrative": {
+        "_type": "DV_TEXT",
+        "value": "Status: ACTIVE"
+      }
+    }
+  ]
+}

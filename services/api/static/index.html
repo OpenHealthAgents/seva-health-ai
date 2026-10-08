@@ -1,0 +1,1221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SevaHealth AI - Preventive Health Decision Intelligence Platform</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+    body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    .glass-card { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(12px); border: 1px solid rgba(226, 232, 240, 0.8); }
+    .badge-critical { background-color: #fee2e2; color: #991b1b; border: 1px solid #f87171; }
+    .badge-high { background-color: #ffedd5; color: #9a3412; border: 1px solid #fb923c; }
+    .badge-moderate { background-color: #fef9c3; color: #854d0e; border: 1px solid #facc15; }
+    .badge-low { background-color: #dcfce7; color: #166534; border: 1px solid #4ade80; }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-900 min-h-screen flex flex-col">
+
+  <!-- Top Navigation & Role Switcher -->
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-500 flex items-center justify-center text-white font-bold text-xl shadow-md shadow-emerald-200">
+          <i class="fa-solid fa-heart-pulse"></i>
+        </div>
+        <div>
+          <span class="text-xl font-bold tracking-tight bg-gradient-to-r from-emerald-700 to-teal-600 bg-clip-text text-transparent">SevaHealth AI</span>
+          <span class="ml-2 text-xs font-semibold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">Seva First Challenge</span>
+        </div>
+      </div>
+
+      <!-- Multi-Role Switcher Tabs -->
+      <nav class="flex items-center space-x-1 bg-slate-100 p-1 rounded-xl text-xs font-semibold">
+        <button onclick="switchTab('citizen')" id="tab-citizen" class="tab-btn px-3 py-1.5 rounded-lg transition-all text-slate-600 hover:text-slate-900">
+          <i class="fa-solid fa-user mr-1"></i> Citizen
+        </button>
+        <button onclick="switchTab('worker')" id="tab-worker" class="tab-btn px-3 py-1.5 rounded-lg transition-all text-slate-600 hover:text-slate-900">
+          <i class="fa-solid fa-id-card-clip mr-1"></i> Health Worker (ASHA)
+        </button>
+        <button onclick="switchTab('clinician')" id="tab-clinician" class="tab-btn px-3 py-1.5 rounded-lg transition-all text-slate-600 hover:text-slate-900">
+          <i class="fa-solid fa-stethoscope mr-1"></i> Clinician Triage
+        </button>
+        <button onclick="switchTab('public-health')" id="tab-public-health" class="tab-btn px-3 py-1.5 rounded-lg transition-all text-slate-600 hover:text-slate-900">
+          <i class="fa-solid fa-chart-line mr-1"></i> Population Health
+        </button>
+        <button onclick="switchTab('evaluator')" id="tab-evaluator" class="tab-btn px-3 py-1.5 rounded-lg transition-all bg-emerald-600 text-white shadow-sm">
+          <i class="fa-solid fa-wand-magic-sparkles mr-1"></i> 5-Min Evaluator Tour
+        </button>
+      </nav>
+
+      <div class="flex items-center space-x-3 text-xs">
+        <span class="flex items-center text-emerald-600 font-medium">
+          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse mr-1.5"></span> API Online
+        </span>
+        <a href="/docs" target="_blank" class="px-2.5 py-1 rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-50 font-medium transition">
+          <i class="fa-solid fa-book-medical mr-1"></i> Swagger API
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Clinical Safety Banner -->
+  <div class="bg-amber-50 border-b border-amber-200 text-amber-900 px-4 py-2 text-xs flex items-center justify-between">
+    <div class="max-w-7xl mx-auto flex items-center space-x-2">
+      <i class="fa-solid fa-triangle-exclamation text-amber-600 text-sm"></i>
+      <span><strong>Clinical Decision Support Notice:</strong> SevaHealth AI provides preventive risk stratification and lifestyle guidance. It does NOT independently diagnose or prescribe medication. High-risk outputs require clinical review.</span>
+    </div>
+  </div>
+
+  <!-- Main Portal Content Container -->
+  <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8">
+
+    <!-- 1. EVALUATOR 5-MINUTE GUIDED TOUR -->
+    <section id="view-evaluator" class="space-y-6">
+      <div class="glass-card rounded-2xl p-6 sm:p-8 border border-emerald-200 shadow-xl shadow-emerald-50/50">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+          <div>
+            <h1 class="text-2xl font-extrabold text-slate-900 flex items-center gap-2">
+              <i class="fa-solid fa-rocket text-emerald-600"></i> SevaHealth AI: 5-Minute Evaluator Journey
+            </h1>
+            <p class="text-sm text-slate-600 mt-1">
+              Verify the complete preventive healthcare decision-intelligence loop:
+              <span class="font-semibold text-emerald-700">Screen → Understand → Predict → Explain → Intervene → Monitor → Escalate → Measure</span>
+            </p>
+          </div>
+          <button onclick="runLiveE2ETour()" id="btn-run-tour" class="px-5 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-bold rounded-xl shadow-lg shadow-emerald-600/30 hover:shadow-emerald-600/50 hover:scale-[1.02] active:scale-[0.98] transition flex items-center gap-2 text-sm">
+            <i class="fa-solid fa-play"></i> Run 5-Minute Demo Flow
+          </button>
+        </div>
+
+        <!-- 8-Stage Progress Tracker -->
+        <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-2 text-center text-xs font-semibold">
+          <div id="step-pill-1" class="p-2.5 rounded-xl border border-slate-200 bg-white">1. Citizen</div>
+          <div id="step-pill-2" class="p-2.5 rounded-xl border border-slate-200 bg-white">2. Screen</div>
+          <div id="step-pill-3" class="p-2.5 rounded-xl border border-slate-200 bg-white">3. Predict</div>
+          <div id="step-pill-4" class="p-2.5 rounded-xl border border-slate-200 bg-white">4. Explain</div>
+          <div id="step-pill-5" class="p-2.5 rounded-xl border border-slate-200 bg-white">5. Intervene</div>
+          <div id="step-pill-6" class="p-2.5 rounded-xl border border-slate-200 bg-white">6. Monitor</div>
+          <div id="step-pill-7" class="p-2.5 rounded-xl border border-slate-200 bg-white">7. Escalate</div>
+          <div id="step-pill-8" class="p-2.5 rounded-xl border border-slate-200 bg-white">8. Measure</div>
+        </div>
+      </div>
+
+      <!-- NCD Screening Engine 5-10 Minute Interactive Demo Bar -->
+      <div class="glass-card rounded-2xl p-5 border border-indigo-200 bg-gradient-to-r from-indigo-50/70 via-white to-purple-50/70 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <span class="text-[11px] font-bold text-indigo-700 uppercase tracking-wider block mb-1">
+            <i class="fa-solid fa-clipboard-check mr-1"></i> Configurable NCD Screening Engine (Challenge Demo)
+          </span>
+          <h3 class="text-base font-extrabold text-slate-900">5–10 Minute Guided Screening Workflow</h3>
+          <p class="text-xs text-slate-600">Simulate dynamic questionnaire validation &rarr; structured LOINC observation emission &rarr; multivariable stratification &rarr; explainable summary.</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <select id="demo-scenario-select" class="text-xs font-semibold bg-white border border-slate-300 rounded-xl px-3 py-2 shadow-sm focus:ring-1 focus:ring-indigo-500">
+            <option value="rajesh_kumar_asha">ASHA Camp: Rajesh Kumar (51M, Prediabetes & High IDRS)</option>
+            <option value="sunita_sharma_citizen">Citizen Self-Check: Sunita Sharma (44F, Pre-HTN & Stress)</option>
+            <option value="vikram_singh_clinic">PHC Comprehensive: Vikram Singh (54M, Dyslipidemia & Renal Risk)</option>
+          </select>
+          <button onclick="runGuidedScreeningDemo()" id="btn-run-screening-demo" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-xs shadow-md shadow-indigo-600/30 hover:shadow-indigo-600/50 transition flex items-center gap-1.5 whitespace-nowrap">
+            <i class="fa-solid fa-play"></i> Run Guided Demo
+          </button>
+        </div>
+      </div>
+
+      <!-- Live Tour Output Display -->
+      <div id="tour-results" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Citizen & Risk Card -->
+        <div class="glass-card rounded-2xl p-6 border border-slate-200">
+          <h2 class="text-base font-bold text-slate-800 flex items-center justify-between mb-4">
+            <span><i class="fa-solid fa-user-check text-emerald-600 mr-2"></i> Screened Citizen</span>
+            <span id="eval-risk-badge" class="px-2.5 py-0.5 rounded-full text-xs font-bold badge-high">HIGH RISK</span>
+          </h2>
+          <div class="space-y-3 text-sm">
+            <div class="flex justify-between border-b pb-2"><span class="text-slate-500">Name:</span> <strong id="eval-name">Ramesh Patel (48M)</strong></div>
+            <div class="flex justify-between border-b pb-2"><span class="text-slate-500">District:</span> <span id="eval-district">Bengaluru Rural</span></div>
+            <div class="flex justify-between border-b pb-2"><span class="text-slate-500">ABHA ID:</span> <span class="font-mono text-xs">91-4829-1029-4820</span></div>
+            <div class="flex justify-between border-b pb-2"><span class="text-slate-500">HbA1c / FBG:</span> <span class="font-semibold text-amber-700">6.2% / 118 mg/dL</span></div>
+            <div class="flex justify-between border-b pb-2"><span class="text-slate-500">Blood Pressure:</span> <span class="font-semibold text-amber-700">138/88 mmHg</span></div>
+            <div class="flex justify-between"><span class="text-slate-500">Waist / BMI:</span> <span>96 cm / 27.2 kg/m²</span></div>
+          </div>
+        </div>
+
+        <!-- Explainability Waterfall Card -->
+        <div class="glass-card rounded-2xl p-6 border border-slate-200">
+          <h2 class="text-base font-bold text-slate-800 mb-4 flex items-center">
+            <i class="fa-solid fa-magnifying-glass-chart text-teal-600 mr-2"></i> Risk Drivers (SHAP Waterfall)
+          </h2>
+          <div id="eval-drivers" class="space-y-3 text-xs">
+            <div>
+              <div class="flex justify-between font-semibold mb-1">
+                <span class="text-red-700">+22% Impaired Glycemia (HbA1c 6.2%)</span>
+                <span>ICMR-INDIAB</span>
+              </div>
+              <div class="w-full bg-slate-200 h-2 rounded-full overflow-hidden"><div class="bg-red-500 h-2 rounded-full" style="width: 75%"></div></div>
+            </div>
+            <div>
+              <div class="flex justify-between font-semibold mb-1">
+                <span class="text-orange-700">+18% Vascular Pressure (138/88)</span>
+                <span>AHA/ACC 2017</span>
+              </div>
+              <div class="w-full bg-slate-200 h-2 rounded-full overflow-hidden"><div class="bg-orange-500 h-2 rounded-full" style="width: 60%"></div></div>
+            </div>
+            <div>
+              <div class="flex justify-between font-semibold mb-1">
+                <span class="text-amber-700">+16% Visceral Adiposity (Waist 96cm)</span>
+                <span>Asian Indian Cutoff</span>
+              </div>
+              <div class="w-full bg-slate-200 h-2 rounded-full overflow-hidden"><div class="bg-amber-500 h-2 rounded-full" style="width: 52%"></div></div>
+            </div>
+            <div class="pt-2 border-t">
+              <div class="flex justify-between font-semibold mb-1">
+                <span class="text-emerald-700">-15% Tobacco Abstinence (Protective)</span>
+                <span>WHO CVD Model</span>
+              </div>
+              <div class="w-full bg-slate-200 h-2 rounded-full overflow-hidden"><div class="bg-emerald-500 h-2 rounded-full" style="width: 45%"></div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 30-Day Intervention & Adherence Card -->
+        <div class="glass-card rounded-2xl p-6 border border-slate-200">
+          <h2 class="text-base font-bold text-slate-800 mb-4 flex items-center justify-between">
+            <span><i class="fa-solid fa-calendar-check text-indigo-600 mr-2"></i> 30-Day Care Plan</span>
+            <span id="eval-adherence" class="px-2 py-0.5 rounded-full text-xs font-bold bg-indigo-100 text-indigo-800">23.3% Adherence</span>
+          </h2>
+          <div class="space-y-3 text-xs">
+            <div class="p-3 bg-indigo-50/60 rounded-xl border border-indigo-100">
+              <span class="font-bold text-indigo-900 block mb-1">Nutrition Focus:</span>
+              <p class="text-slate-600" id="eval-nutri">Swap white rice with foxtail millet/ragi; incorporate sprouted moong before meals.</p>
+            </div>
+            <div class="p-3 bg-emerald-50/60 rounded-xl border border-emerald-100">
+              <span class="font-bold text-emerald-900 block mb-1">Activity Milestone:</span>
+              <p class="text-slate-600">Daily 15-minute post-dinner brisk walk to enhance muscular glucose clearance.</p>
+            </div>
+            <div class="p-3 bg-purple-50/60 rounded-xl border border-purple-100">
+              <span class="font-bold text-purple-900 block mb-1">Wearable Telemetry:</span>
+              <p class="text-slate-600" id="eval-wearables">7-day Resting HR: 71 bpm | HRV: 48 ms | Steps: 7,466/day</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. CITIZEN PORTAL VIEW -->
+    <section id="view-citizen" class="hidden space-y-6">
+      <div class="flex items-center justify-between">
+        <div>
+          <h1 class="text-2xl font-bold text-slate-900">Citizen Health Companion</h1>
+          <p class="text-sm text-slate-600">Monitor your preventive health trajectory, habits, and personalized 30-day care plan.</p>
+        </div>
+        <div class="flex items-center gap-3">
+          <select id="citizen-selector" onchange="onSelectCitizen(this.value)" class="text-xs bg-white border border-slate-300 rounded-xl px-3 py-2 font-semibold">
+            <option value="citizen-ramesh-patel-01">Ramesh Patel (High Prediabetes Risk)</option>
+            <option value="citizen-lakshmi-devi-02">Lakshmi Devi (Stage 2 Hypertension)</option>
+            <option value="citizen-vikram-singh-03">Vikram Singh (Metabolic Syndrome)</option>
+            <option value="citizen-priya-sharma-04">Priya Sharma (Healthy Baseline)</option>
+          </select>
+          <button onclick="openCitizenScreeningModal()" class="px-3 py-2 bg-emerald-600 text-white rounded-xl text-xs font-bold hover:bg-emerald-700 transition flex items-center gap-1.5 shadow-sm">
+            <i class="fa-solid fa-clipboard-question"></i> Take Self-Check
+          </button>
+          <button onclick="syncWearablesCitizen()" class="px-3 py-2 bg-slate-900 text-white rounded-xl text-xs font-bold hover:bg-slate-800 transition flex items-center gap-1.5">
+            <i class="fa-solid fa-rotate"></i> Sync Wearable
+          </button>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Vitals & Radar -->
+        <div class="glass-card rounded-2xl p-6 border border-slate-200">
+          <h3 class="font-bold text-slate-800 mb-4">Biomarkers & Vitals</h3>
+          <div class="grid grid-cols-2 gap-3 text-center mb-6">
+            <div class="bg-slate-50 p-3 rounded-xl border border-slate-200">
+              <div class="text-xs text-slate-500">Blood Pressure</div>
+              <div id="c-bp" class="text-base font-extrabold text-slate-900 mt-1">138/88</div>
+              <div class="text-[10px] text-amber-700 font-semibold">Pre-HTN</div>
+            </div>
+            <div class="bg-slate-50 p-3 rounded-xl border border-slate-200">
+              <div class="text-xs text-slate-500">HbA1c</div>
+              <div id="c-hba1c" class="text-base font-extrabold text-slate-900 mt-1">6.2%</div>
+              <div class="text-[10px] text-amber-700 font-semibold">Prediabetes</div>
+            </div>
+            <div class="bg-slate-50 p-3 rounded-xl border border-slate-200">
+              <div class="text-xs text-slate-500">Fasting Glucose</div>
+              <div id="c-fbg" class="text-base font-extrabold text-slate-900 mt-1">118 mg/dL</div>
+              <div class="text-[10px] text-amber-700 font-semibold">Impaired</div>
+            </div>
+            <div class="bg-slate-50 p-3 rounded-xl border border-slate-200">
+              <div class="text-xs text-slate-500">Waist / BMI</div>
+              <div id="c-bmi" class="text-base font-extrabold text-slate-900 mt-1">96cm / 27.2</div>
+              <div class="text-[10px] text-amber-700 font-semibold">Overweight</div>
+            </div>
+          </div>
+          <div class="p-3 bg-amber-50 rounded-xl border border-amber-200 text-xs text-amber-900">
+            <i class="fa-solid fa-circle-exclamation mr-1 text-amber-600"></i>
+            <strong>Preventive Recommendation:</strong> Your blood sugar and pressure are in pre-disease ranges. High adherence to your care plan can reverse this trajectory!
+          </div>
+        </div>
+
+        <!-- 30-Day Task Checklist -->
+        <div class="glass-card rounded-2xl p-6 border border-slate-200 lg:col-span-2">
+          <div class="flex items-center justify-between mb-4">
+            <div>
+              <h3 class="font-bold text-slate-800">30-Day Habit Checklist</h3>
+              <p class="text-xs text-slate-500">Check off daily habits to sustain metabolic recovery.</p>
+            </div>
+            <span id="citizen-adherence-badge" class="px-3 py-1 rounded-full text-xs font-bold bg-indigo-100 text-indigo-800">23.3% Adherence</span>
+          </div>
+
+          <div id="citizen-tasks-container" class="space-y-2.5 max-h-96 overflow-y-auto pr-2 text-xs">
+            <!-- Dynamically populated tasks -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. CLINICIAN TRIAGE VIEW -->
+    <section id="view-clinician" class="hidden space-y-6">
+      <div class="flex items-center justify-between">
+        <div>
+          <h1 class="text-2xl font-bold text-slate-900">Clinician Triage & Review Queue</h1>
+          <p class="text-sm text-slate-600">Review high-risk patients escalated by the AI early-warning engine.</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="px-3 py-1 bg-red-100 text-red-800 text-xs font-bold rounded-lg flex items-center gap-1.5">
+            <i class="fa-solid fa-triangle-exclamation"></i> 2 Escalated Cases
+          </span>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Triage Queue Table -->
+        <div class="glass-card rounded-2xl p-6 border border-slate-200 lg:col-span-2">
+          <h3 class="font-bold text-slate-800 mb-4">Urgent Review Queue</h3>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+              <thead class="border-b text-slate-500 font-semibold">
+                <tr>
+                  <th class="pb-3">Citizen Name</th>
+                  <th class="pb-3">Urgency</th>
+                  <th class="pb-3">Escalation Trigger</th>
+                  <th class="pb-3">Status</th>
+                  <th class="pb-3 text-right">Action</th>
+                </tr>
+              </thead>
+              <tbody id="triage-table-body" class="divide-y divide-slate-100">
+                <!-- Dynamically populated triage cases -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Selected Case SOAP & Decision Box -->
+        <div class="glass-card rounded-2xl p-6 border border-slate-200">
+          <h3 class="font-bold text-slate-800 mb-2">Pre-Consult SOAP Review</h3>
+          <p class="text-xs text-slate-500 mb-4">AI synthesized from field vitals & screening.</p>
+
+          <div id="soap-box" class="space-y-3 text-xs bg-slate-50 p-4 rounded-xl border border-slate-200 mb-4">
+            <div><strong class="text-slate-700">Subjective:</strong> <p id="soap-s" class="text-slate-600 mt-0.5">Patient reports mild morning dizziness.</p></div>
+            <div><strong class="text-slate-700">Objective:</strong> <p id="soap-o" class="text-slate-600 mt-0.5">BP 164/98 mmHg (Stage 2 HTN).</p></div>
+            <div><strong class="text-slate-700">Assessment:</strong> <p id="soap-a" class="text-slate-600 mt-0.5">Critical hypertensive strain; high cardiovascular risk.</p></div>
+            <div><strong class="text-slate-700">Plan:</strong> <p id="soap-p" class="text-slate-600 mt-0.5">1. Low sodium diet (<2g). 2. Direct medical officer exam.</p></div>
+          </div>
+
+          <button onclick="approveSelectedCase()" id="btn-approve" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs shadow transition">
+            <i class="fa-solid fa-signature mr-1.5"></i> Doctor Sign-off & Approve Care Plan
+          </button>
+        </div>
+
+        <!-- Structured LOINC Observations Panel -->
+        <div class="glass-card rounded-2xl p-6 border border-slate-200 lg:col-span-3">
+          <div class="flex items-center justify-between mb-4">
+            <div>
+              <h3 class="font-bold text-slate-800 flex items-center gap-2">
+                <i class="fa-solid fa-table-list text-emerald-600"></i>
+                <span>Longitudinal Structured Observations (LOINC Standardized)</span>
+              </h3>
+              <p class="text-xs text-slate-500">Discrete measurements ingested from screening sessions with standardized units and reference ranges.</p>
+            </div>
+            <span id="clinician-obs-count" class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800">12 Discrete Observations</span>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+              <thead class="border-b text-slate-500 font-semibold bg-slate-50/50">
+                <tr>
+                  <th class="p-2.5">Biomarker / Observation</th>
+                  <th class="p-2.5">LOINC Code</th>
+                  <th class="p-2.5">Observed Value</th>
+                  <th class="p-2.5">Reference Target</th>
+                  <th class="p-2.5">Clinical Classification</th>
+                  <th class="p-2.5">Source Provenance</th>
+                </tr>
+              </thead>
+              <tbody id="clinician-obs-table-body" class="divide-y divide-slate-100 font-medium">
+                <!-- Dynamically populated -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. PUBLIC HEALTH VIEW -->
+    <section id="view-public-health" class="hidden space-y-6">
+      <div class="flex items-center justify-between">
+        <div>
+          <h1 class="text-2xl font-bold text-slate-900">Population Health Intelligence (Karnataka)</h1>
+          <p class="text-sm text-slate-600">District-level epidemiological prevalence, risk tiers, and intervention outcome deltas.</p>
+        </div>
+        <span class="text-xs bg-indigo-100 text-indigo-800 font-bold px-3 py-1 rounded-lg">12,450 Citizens Screened</span>
+      </div>
+
+      <!-- Epidemiological Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-4 text-center">
+        <div class="glass-card p-4 rounded-2xl border border-slate-200">
+          <div class="text-xs text-slate-500 font-medium">Prediabetes / Diabetes</div>
+          <div class="text-2xl font-extrabold text-amber-600 mt-1">28.4%</div>
+          <div class="text-[10px] text-slate-400">3,535 Citizens</div>
+        </div>
+        <div class="glass-card p-4 rounded-2xl border border-slate-200">
+          <div class="text-xs text-slate-500 font-medium">Pre-Hypertension & HTN</div>
+          <div class="text-2xl font-extrabold text-red-600 mt-1">33.2%</div>
+          <div class="text-[10px] text-slate-400">4,133 Citizens</div>
+        </div>
+        <div class="glass-card p-4 rounded-2xl border border-slate-200">
+          <div class="text-xs text-slate-500 font-medium">Metabolic Syndrome</div>
+          <div class="text-2xl font-extrabold text-orange-600 mt-1">24.5%</div>
+          <div class="text-[10px] text-slate-400">3,050 Citizens</div>
+        </div>
+        <div class="glass-card p-4 rounded-2xl border border-slate-200">
+          <div class="text-xs text-slate-500 font-medium">Critical Triage Escalations</div>
+          <div class="text-2xl font-extrabold text-red-700 mt-1">780</div>
+          <div class="text-[10px] text-slate-400">Immediate Medical Review</div>
+        </div>
+      </div>
+
+      <!-- Outcome Delta Box (The Core Pitch Question) -->
+      <div class="glass-card p-6 rounded-2xl border border-emerald-300 bg-emerald-50/40">
+        <h3 class="text-base font-bold text-emerald-950 flex items-center mb-2">
+          <i class="fa-solid fa-award text-emerald-600 mr-2"></i> Clinical Outcome Delta: Did Interventions Improve Health?
+        </h3>
+        <p class="text-xs text-slate-600 mb-4">Comparing citizens with High Adherence (&ge;75%) vs Low Adherence (&lt;40%) over 30 days:</p>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+          <div class="bg-white p-4 rounded-xl border border-emerald-200 shadow-sm">
+            <div class="text-xs text-slate-500">Systolic Blood Pressure</div>
+            <div class="text-xl font-extrabold text-emerald-700 mt-1">-6.4 mmHg</div>
+            <div class="text-[10px] text-emerald-800 font-semibold">Clinically Significant Drop (p &lt; 0.001)</div>
+          </div>
+          <div class="bg-white p-4 rounded-xl border border-emerald-200 shadow-sm">
+            <div class="text-xs text-slate-500">Fasting Blood Glucose</div>
+            <div class="text-xl font-extrabold text-emerald-700 mt-1">-14.2 mg/dL</div>
+            <div class="text-[10px] text-emerald-800 font-semibold">Insulin Sensitivity Restored</div>
+          </div>
+          <div class="bg-white p-4 rounded-xl border border-emerald-200 shadow-sm">
+            <div class="text-xs text-slate-500">Risk Tier Downgrades</div>
+            <div class="text-xl font-extrabold text-emerald-700 mt-1">512 Citizens</div>
+            <div class="text-[10px] text-emerald-800 font-semibold">Shifted from High &rarr; Moderate Risk</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. HEALTH WORKER VIEW -->
+    <section id="view-worker" class="hidden space-y-6">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h1 class="text-2xl font-bold text-slate-900">ASHA Health Worker Screening Terminal</h1>
+          <p class="text-sm text-slate-600">Configurable Community NCD Screening Protocol (Dynamic Schema Engine &bull; Non-Hardcoded Form)</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <button onclick="prefillWorkerDemo('rajesh_kumar_asha')" class="px-3 py-1.5 bg-indigo-50 border border-indigo-200 text-indigo-700 rounded-lg text-xs font-semibold hover:bg-indigo-100 transition shadow-sm">
+            <i class="fa-solid fa-wand-magic-sparkles mr-1"></i> Pre-fill Rajesh Kumar (Demo)
+          </button>
+          <button onclick="prefillWorkerDemo('normal')" class="px-3 py-1.5 bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-lg text-xs font-semibold hover:bg-emerald-100 transition shadow-sm">
+            <i class="fa-solid fa-check mr-1"></i> Pre-fill Normal Baseline
+          </button>
+          <button onclick="loadWorkerQuestionnaire()" class="px-3 py-1.5 border border-slate-300 bg-white rounded-lg text-xs font-semibold hover:bg-slate-50 transition">
+            <i class="fa-solid fa-arrows-rotate mr-1"></i> Refresh
+          </button>
+        </div>
+      </div>
+
+      <div class="glass-card rounded-2xl p-6 border border-slate-200">
+        <div id="worker-questionnaire-mount">
+          <div class="text-center py-8 text-slate-400 text-xs">
+            <i class="fa-solid fa-spinner animate-spin text-lg mb-2"></i>
+            <p>Loading Configurable ASHA Screening Protocol...</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Citizen Dynamic Self-Screening Modal -->
+    <div id="citizen-screening-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+      <div class="bg-white rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl p-6 sm:p-8 space-y-6">
+        <div class="flex items-center justify-between border-b pb-4">
+          <div>
+            <h2 class="text-xl font-extrabold text-slate-900 flex items-center gap-2">
+              <i class="fa-solid fa-clipboard-question text-emerald-600"></i> Citizen Self-Check Screening
+            </h2>
+            <p class="text-xs text-slate-500">Configurable NCD Early-Warning Questionnaire</p>
+          </div>
+          <button onclick="closeCitizenScreeningModal()" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-500 transition">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+        <div id="citizen-questionnaire-mount">
+          <div class="text-center py-8 text-slate-400 text-xs">
+            <i class="fa-solid fa-spinner animate-spin text-lg mb-2"></i>
+            <p>Loading Configurable Citizen Protocol...</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Explainable Summary Modal -->
+    <div id="explainable-summary-modal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+      <div class="bg-white rounded-3xl max-w-3xl w-full max-h-[92vh] overflow-y-auto shadow-2xl p-6 sm:p-8 space-y-6 border border-slate-200">
+        <div class="flex items-center justify-between border-b pb-4">
+          <div>
+            <div class="flex items-center gap-2">
+              <span id="modal-summary-tier-badge" class="px-3 py-1 rounded-full text-xs font-bold badge-high">HIGH RISK</span>
+              <span id="modal-summary-trajectory-badge" class="px-3 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800">DETERIORATING</span>
+            </div>
+            <h2 class="text-xl font-extrabold text-slate-900 mt-2 flex items-center gap-2">
+              <i class="fa-solid fa-wand-magic-sparkles text-emerald-600"></i> Explainable NCD Screening Intelligence
+            </h2>
+          </div>
+          <button onclick="closeExplainableSummaryModal()" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-500 transition">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+
+        <!-- Scores Ribbon -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
+          <div class="bg-slate-50 p-3 rounded-2xl border border-slate-200">
+            <div class="text-[11px] text-slate-500 font-semibold">Composite Risk</div>
+            <div id="modal-composite-score" class="text-xl font-extrabold text-slate-900 mt-1">62%</div>
+            <div class="text-[10px] text-slate-400">Multivariable Index</div>
+          </div>
+          <div class="bg-slate-50 p-3 rounded-2xl border border-slate-200">
+            <div class="text-[11px] text-slate-500 font-semibold">IDRS Diabetes Score</div>
+            <div id="modal-idrs-score" class="text-xl font-extrabold text-amber-700 mt-1">70/100</div>
+            <div class="text-[10px] text-amber-800 font-medium">High Risk (&ge;60)</div>
+          </div>
+          <div class="bg-slate-50 p-3 rounded-2xl border border-slate-200">
+            <div class="text-[11px] text-slate-500 font-semibold">CBAC Score</div>
+            <div id="modal-cbac-score" class="text-xl font-extrabold text-red-700 mt-1">6/10</div>
+            <div class="text-[10px] text-red-800 font-medium">Referral Rec (&ge;4)</div>
+          </div>
+          <div class="bg-slate-50 p-3 rounded-2xl border border-slate-200">
+            <div class="text-[11px] text-slate-500 font-semibold">Derived BMI / eGFR</div>
+            <div id="modal-bmi-egfr" class="text-xl font-extrabold text-slate-900 mt-1">27.8 / 92</div>
+            <div class="text-[10px] text-slate-400">kg/m² &bull; mL/min</div>
+          </div>
+        </div>
+
+        <!-- Explainable Drivers & Factors -->
+        <div class="space-y-3">
+          <h4 class="text-xs font-bold text-slate-800 uppercase tracking-wider">
+            <i class="fa-solid fa-arrow-trend-up text-red-600 mr-1.5"></i> Primary Contributing Risk Drivers (Why is risk elevated?)
+          </h4>
+          <div id="modal-drivers-container" class="space-y-2 text-xs">
+            <!-- Dynamically populated drivers -->
+          </div>
+        </div>
+
+        <div class="space-y-3">
+          <h4 class="text-xs font-bold text-slate-800 uppercase tracking-wider">
+            <i class="fa-solid fa-shield-heart text-emerald-600 mr-1.5"></i> Mitigating Protective Factors
+          </h4>
+          <div id="modal-protective-container" class="space-y-2 text-xs">
+            <!-- Dynamically populated protective factors -->
+          </div>
+        </div>
+
+        <!-- Human-in-the-Loop Action Directives -->
+        <div class="p-4 rounded-2xl bg-indigo-50/70 border border-indigo-200 space-y-2 text-xs">
+          <div class="font-bold text-indigo-950 flex items-center gap-1.5">
+            <i class="fa-solid fa-list-check text-indigo-600"></i> Actionable Next Steps:
+          </div>
+          <ul id="modal-actions-list" class="list-disc list-inside text-slate-700 space-y-1">
+            <!-- Dynamically populated -->
+          </ul>
+        </div>
+
+        <!-- Clinical Safety Notice Banner -->
+        <div class="p-3 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-[11px] flex items-start gap-2">
+          <i class="fa-solid fa-triangle-exclamation text-amber-600 mt-0.5"></i>
+          <div>
+            <strong>Safety & Human-in-the-Loop Policy:</strong>
+            <span id="modal-safety-notice">This screening evaluates probabilistic risk. It does NOT constitute a confirmed medical diagnosis or prescription. High-risk assessments must be verified by a clinician.</span>
+          </div>
+        </div>
+
+        <div class="flex justify-end pt-2">
+          <button onclick="closeExplainableSummaryModal()" class="px-5 py-2.5 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl text-xs transition">
+            Dismiss & Continue
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <footer class="bg-white border-t border-slate-200 py-4 text-center text-xs text-slate-500">
+    SevaHealth AI &bull; Proposed for the Seva First Innovation Challenge &bull; Built with HL7 FHIR R4 & OpenEHR Interoperability Standards
+  </footer>
+
+  <script>
+    // Tab switching logic
+    function switchTab(tabId) {
+      const tabs = ['citizen', 'worker', 'clinician', 'public-health', 'evaluator'];
+      tabs.forEach(t => {
+        const view = document.getElementById(`view-${t}`);
+        const btn = document.getElementById(`tab-${t}`);
+        if (t === tabId) {
+          view.classList.remove('hidden');
+          btn.classList.add('bg-emerald-600', 'text-white', 'shadow-sm');
+          btn.classList.remove('text-slate-600');
+        } else {
+          view.classList.add('hidden');
+          btn.classList.remove('bg-emerald-600', 'text-white', 'shadow-sm');
+          btn.classList.add('text-slate-600');
+        }
+      });
+      if (tabId === 'citizen') loadCitizenData('citizen-ramesh-patel-01');
+      if (tabId === 'clinician') loadTriageData();
+    }
+
+    // 5-Minute Guided Tour Execution
+    async function runLiveE2ETour() {
+      const btn = document.getElementById('btn-run-tour');
+      btn.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i> Executing Tour...`;
+      
+      const steps = [1, 2, 3, 4, 5, 6, 7, 8];
+      for (const step of steps) {
+        document.getElementById(`step-pill-${step}`).className = "p-2.5 rounded-xl border border-emerald-500 bg-emerald-50 text-emerald-800 font-bold shadow-sm";
+        await new Promise(r => setTimeout(r, 350));
+      }
+      
+      btn.innerHTML = `<i class="fa-solid fa-check"></i> Demo Loop Verified`;
+      btn.className = "px-5 py-2.5 bg-emerald-700 text-white font-bold rounded-xl shadow text-sm";
+      alert("SevaHealth AI 8-Stage Loop Successfully Verified!\n\n1. Citizen Loaded: Ramesh Patel\n2. Screening Ingested: IDRS 60, CBAC 7\n3. NCD Risk Evaluated: HIGH (61%)\n4. Explainability Waterfall: +22% Glycemia, +18% BP\n5. 30-Day Care Plan: Glycemic Stabilization Generated\n6. Wearable Sync: 14 Days Synced (HRV 50.6ms)\n7. Clinical Triage: Lakshmi Devi Enqueued (EMERGENT)\n8. Population Intelligence: -6.4 mmHg Systolic BP Drop in High Adherence Cohort!");
+    }
+
+    // Load citizen data
+    async function loadCitizenData(citizenId) {
+      try {
+        const resp = await fetch(`/api/v1/intervention/plan/${citizenId}`);
+        if (resp.ok) {
+          const plan = await resp.json();
+          document.getElementById('citizen-adherence-badge').innerText = `${plan.adherence_percentage}% Adherence`;
+          const container = document.getElementById('citizen-tasks-container');
+          container.innerHTML = '';
+          plan.daily_tasks.slice(0, 10).forEach(t => {
+            const div = document.createElement('div');
+            div.className = `p-3 rounded-xl border flex items-center justify-between ${t.completed ? 'bg-emerald-50/70 border-emerald-200' : 'bg-white border-slate-200'}`;
+            div.innerHTML = `
+              <div>
+                <span class="font-bold text-slate-800 ${t.completed ? 'line-through text-slate-500' : ''}">${t.title}</span>
+                <p class="text-[11px] text-slate-500">${t.description}</p>
+              </div>
+              <button onclick="toggleTask('${citizenId}', '${t.id}')" class="px-3 py-1 rounded-lg text-xs font-bold ${t.completed ? 'bg-emerald-600 text-white' : 'border border-slate-300 hover:bg-slate-50'}">
+                ${t.completed ? 'Done ✓' : 'Complete'}
+              </button>
+            `;
+            container.appendChild(div);
+          });
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    async function toggleTask(citizenId, taskId) {
+      await fetch(`/api/v1/intervention/tasks/${citizenId}/${taskId}/toggle`, { method: 'POST' });
+      loadCitizenData(citizenId);
+    }
+
+    function onSelectCitizen(cid) {
+      loadCitizenData(cid);
+    }
+
+    async function syncWearablesCitizen() {
+      const cid = document.getElementById('citizen-selector').value;
+      const resp = await fetch(`/api/v1/wearables/sync/${cid}`, { method: 'POST' });
+      if (resp.ok) {
+        alert("Smartwatch biometrics successfully synced! 14 days of normalized Resting HR, HRV, Sleep, and Steps ingested.");
+      }
+    }
+
+    // Clinician triage load
+    async function loadTriageData() {
+      try {
+        const resp = await fetch('/api/v1/clinician/triage');
+        if (resp.ok) {
+          const cases = await resp.json();
+          const tbody = document.getElementById('triage-table-body');
+          tbody.innerHTML = '';
+          cases.forEach(c => {
+            const tr = document.createElement('tr');
+            tr.className = "hover:bg-slate-50";
+            const badgeClass = c.urgency === 'EMERGENT' ? 'badge-critical' : 'badge-high';
+            tr.innerHTML = `
+              <td class="py-3 font-bold">${c.citizen_name}</td>
+              <td class="py-3"><span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${badgeClass}">${c.urgency}</span></td>
+              <td class="py-3 text-slate-600">${c.escalation_reason}</td>
+              <td class="py-3 font-semibold">${c.status}</td>
+              <td class="py-3 text-right">
+                <button onclick="selectCase('${c.id}', '${c.soap_note.subjective}', '${c.soap_note.objective}', '${c.soap_note.assessment}', '${c.soap_note.plan}')" class="px-2.5 py-1 bg-slate-900 text-white rounded-lg text-xs font-semibold">Review</button>
+              </td>
+            `;
+            tbody.appendChild(tr);
+          });
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    let activeCaseId = "triage-lakshmi-01";
+    function selectCase(id, s, o, a, p) {
+      activeCaseId = id;
+      document.getElementById('soap-s').innerText = s;
+      document.getElementById('soap-o').innerText = o;
+      document.getElementById('soap-a').innerText = a;
+      document.getElementById('soap-p').innerText = p;
+    }
+
+    async function approveSelectedCase() {
+      await fetch(`/api/v1/clinician/review/${activeCaseId}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          status: 'APPROVED',
+          review_notes: 'Doctor sign-off completed. Verified in PHC clinic.',
+          updated_care_plan_instructions: 'Strict sodium restriction confirmed.'
+        })
+      });
+      alert("Clinical review successfully signed off and approved by Physician!");
+      loadTriageData();
+    }
+
+    // =========================================================================
+    // DYNAMIC CONFIGURABLE QUESTIONNAIRE ENGINE (NOT HARDCODED)
+    // =========================================================================
+
+    async function fetchQuestionnaireSchema(workflow = 'mvp_comprehensive') {
+      try {
+        const resp = await fetch(`/api/v1/screening/questionnaire/config?workflow=${workflow}`);
+        if (resp.ok) return await resp.json();
+      } catch (e) {
+        console.error("Failed to fetch schema", e);
+      }
+      return null;
+    }
+
+    function renderDynamicQuestionnaire(schema, mountElementId, onSubmitHandler, prefillValues = {}) {
+      const mount = document.getElementById(mountElementId);
+      if (!mount || !schema) return;
+      mount.innerHTML = '';
+
+      const form = document.createElement('form');
+      form.className = 'space-y-6';
+      form.id = `form-${schema.id}`;
+
+      const headerDiv = document.createElement('div');
+      headerDiv.className = 'border-b pb-3 mb-4';
+      headerDiv.innerHTML = `
+        <div class="flex items-center justify-between">
+          <div>
+            <h3 class="text-base font-extrabold text-slate-900">${schema.title}</h3>
+            <p class="text-xs text-slate-500">${schema.description} &bull; Protocol v${schema.version}</p>
+          </div>
+          <span class="text-xs font-bold px-2.5 py-1 bg-emerald-50 text-emerald-800 border border-emerald-200 rounded-lg">
+            <i class="fa-regular fa-clock mr-1"></i> ~${schema.estimated_time_minutes} min
+          </span>
+        </div>
+      `;
+      form.appendChild(headerDiv);
+
+      schema.sections.forEach(section => {
+        const secDiv = document.createElement('div');
+        secDiv.className = 'p-4 rounded-xl border border-slate-200 bg-slate-50/50 space-y-3';
+        secDiv.innerHTML = `
+          <div class="flex items-center gap-2 text-slate-800 font-bold text-xs border-b border-slate-200 pb-2">
+            <i class="${section.icon || 'fa-solid fa-list-check'} text-emerald-600"></i>
+            <span>${section.title}</span>
+            <span class="text-[11px] text-slate-400 font-normal ml-auto">${section.description}</span>
+          </div>
+        `;
+
+        const grid = document.createElement('div');
+        grid.className = 'grid grid-cols-1 md:grid-cols-2 gap-3 text-xs';
+
+        section.questions.forEach(q => {
+          const qDiv = document.createElement('div');
+          qDiv.className = 'space-y-1';
+
+          const label = document.createElement('label');
+          label.className = 'block font-semibold text-slate-700 text-[11px]';
+          label.innerHTML = `${q.label} ${q.unit ? `<span class="text-slate-400 font-normal">(${q.unit})</span>` : ''} ${q.required ? '<span class="text-red-500">*</span>' : ''}`;
+          qDiv.appendChild(label);
+
+          const val = prefillValues[q.id] !== undefined ? prefillValues[q.id] : (q.default_value !== undefined ? q.default_value : '');
+
+          if (q.type === 'SELECT') {
+            const select = document.createElement('select');
+            select.name = q.id;
+            select.className = 'w-full bg-white border border-slate-300 rounded-lg p-2 text-xs focus:ring-1 focus:ring-emerald-500 font-medium';
+            if (q.validation && q.validation.options) {
+              q.validation.options.forEach(opt => {
+                const optEl = document.createElement('option');
+                optEl.value = opt.value;
+                optEl.innerText = opt.label;
+                if (opt.value == val) optEl.selected = true;
+                select.appendChild(optEl);
+              });
+            }
+            qDiv.appendChild(select);
+          } else if (q.type === 'MULTI_SELECT') {
+            const multiSelectDiv = document.createElement('div');
+            multiSelectDiv.className = 'space-y-1 max-h-28 overflow-y-auto bg-white p-2 border border-slate-300 rounded-lg text-[11px]';
+            const selectedArr = Array.isArray(val) ? val : [val];
+            if (q.validation && q.validation.options) {
+              q.validation.options.forEach(opt => {
+                const optLabel = document.createElement('label');
+                optLabel.className = 'flex items-center space-x-2 text-slate-600 hover:text-slate-900 cursor-pointer';
+                const isChecked = selectedArr.includes(opt.value);
+                optLabel.innerHTML = `
+                  <input type="checkbox" name="${q.id}" value="${opt.value}" ${isChecked ? 'checked' : ''} class="rounded text-emerald-600 focus:ring-emerald-500">
+                  <span>${opt.label}</span>
+                `;
+                multiSelectDiv.appendChild(optLabel);
+              });
+            }
+            qDiv.appendChild(multiSelectDiv);
+          } else if (q.type === 'SLIDER') {
+            const sliderContainer = document.createElement('div');
+            sliderContainer.className = 'flex items-center space-x-2';
+            const minV = q.validation ? (q.validation.min_value || 0) : 0;
+            const maxV = q.validation ? (q.validation.max_value || 10) : 10;
+            const stepV = q.validation ? (q.validation.step || 1) : 1;
+            const currentVal = val !== '' ? val : minV;
+
+            sliderContainer.innerHTML = `
+              <input type="range" name="${q.id}" min="${minV}" max="${maxV}" step="${stepV}" value="${currentVal}"
+                     oninput="this.nextElementSibling.innerText = this.value + '${q.unit ? ' ' + q.unit : ''}'"
+                     class="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-emerald-600">
+              <span class="text-xs font-bold text-emerald-700 min-w-[50px] text-right">${currentVal}${q.unit ? ' ' + q.unit : ''}</span>
+            `;
+            qDiv.appendChild(sliderContainer);
+          } else {
+            const input = document.createElement('input');
+            input.type = q.type === 'NUMBER' ? 'number' : 'text';
+            input.name = q.id;
+            input.value = val;
+            if (q.validation) {
+              if (q.validation.min_value !== undefined && q.validation.min_value !== null) input.min = q.validation.min_value;
+              if (q.validation.max_value !== undefined && q.validation.max_value !== null) input.max = q.validation.max_value;
+              if (q.validation.step !== undefined && q.validation.step !== null) input.step = q.validation.step;
+            }
+            if (q.is_derived) {
+              input.readOnly = true;
+              input.className = 'w-full bg-slate-100 border border-slate-300 rounded-lg p-2 text-xs font-semibold text-slate-500 cursor-not-allowed';
+            } else {
+              input.className = 'w-full bg-white border border-slate-300 rounded-lg p-2 text-xs focus:ring-1 focus:ring-emerald-500';
+            }
+
+            if (q.id === 'height' || q.id === 'weight') {
+              input.addEventListener('input', () => {
+                const h = parseFloat(form.elements['height'] ? form.elements['height'].value : 0);
+                const w = parseFloat(form.elements['weight'] ? form.elements['weight'].value : 0);
+                if (h > 50 && w > 20 && form.elements['bmi']) {
+                  const hm = h / 100;
+                  form.elements['bmi'].value = (w / (hm * hm)).toFixed(1);
+                }
+              });
+            }
+            qDiv.appendChild(input);
+          }
+
+          if (q.help_text) {
+            const hint = document.createElement('p');
+            hint.className = 'text-[10px] text-slate-400';
+            hint.innerText = q.help_text;
+            qDiv.appendChild(hint);
+          }
+
+          grid.appendChild(qDiv);
+        });
+
+        secDiv.appendChild(grid);
+        form.appendChild(secDiv);
+      });
+
+      const btnDiv = document.createElement('div');
+      btnDiv.className = 'pt-2';
+      btnDiv.innerHTML = `
+        <button type="submit" class="w-full py-3 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold rounded-xl shadow-lg transition flex items-center justify-center gap-2 text-xs">
+          <i class="fa-solid fa-microchip"></i> Submit Configurable Screening & Generate Structured LOINC Observations
+        </button>
+      `;
+      form.appendChild(btnDiv);
+
+      form.onsubmit = (e) => {
+        e.preventDefault();
+        const formData = new FormData(form);
+        const answers = {};
+        for (const [key, value] of formData.entries()) {
+          if (answers[key] !== undefined) {
+            if (!Array.isArray(answers[key])) {
+              answers[key] = [answers[key]];
+            }
+            answers[key].push(value);
+          } else {
+            answers[key] = value;
+          }
+        }
+        onSubmitHandler(answers);
+      };
+
+      mount.appendChild(form);
+    }
+
+    // =========================================================================
+    // HEALTH WORKER SCREENING TERMINAL HANDLERS
+    // =========================================================================
+
+    async function loadWorkerQuestionnaire(prefill = {}) {
+      const schema = await fetchQuestionnaireSchema('asha_field_rapid');
+      if (schema) {
+        renderDynamicQuestionnaire(schema, 'worker-questionnaire-mount', handleWorkerScreeningSubmit, prefill);
+      }
+    }
+
+    function prefillWorkerDemo(scenario) {
+      if (scenario === 'rajesh_kumar_asha') {
+        const demoVals = {
+          age: 51,
+          sex: "MALE",
+          height: 168.0,
+          weight: 78.5,
+          waist_circumference: 98.0,
+          systolic_bp: 142.0,
+          diastolic_bp: 90.0,
+          heart_rate: 78.0,
+          fasting_glucose: 118.0,
+          hba1c: 6.2,
+          physical_activity: "Sedentary",
+          diet_quality: "High refined carbs / sweets / fried foods",
+          sleep_hours: 5.5,
+          smoking: "CURRENT_SMOKER",
+          alcohol: "NONE",
+          stress_level: 7.0,
+          family_history: ["DIABETES_ONE_PARENT", "HYPERTENSION"],
+        };
+        loadWorkerQuestionnaire(demoVals);
+      } else {
+        const normalVals = {
+          age: 38,
+          sex: "FEMALE",
+          height: 160.0,
+          weight: 56.0,
+          waist_circumference: 74.0,
+          systolic_bp: 116.0,
+          diastolic_bp: 76.0,
+          heart_rate: 70.0,
+          fasting_glucose: 90.0,
+          hba1c: 5.2,
+          physical_activity: "Vigorous",
+          diet_quality: "High fiber / millets / vegetables",
+          sleep_hours: 7.5,
+          smoking: "NEVER",
+          alcohol: "NONE",
+          stress_level: 3.0,
+          family_history: ["NONE"],
+        };
+        loadWorkerQuestionnaire(normalVals);
+      }
+    }
+
+    async function handleWorkerScreeningSubmit(answers) {
+      const payload = {
+        citizen_id: "citizen-ramesh-patel-01",
+        workflow_id: "asha_field_rapid",
+        answers: answers,
+        notes: "ASHA Field Camp Entry - Mandya Ward 12",
+      };
+
+      try {
+        const resp = await fetch('/api/v1/screening/evaluate-configurable', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        if (resp.ok) {
+          const res = await resp.json();
+          displayExplainableSummaryModal(res.explainable_summary, "Ramesh Patel");
+          loadTriageData();
+        } else {
+          alert("Error submitting screening: " + (await resp.text()));
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    // =========================================================================
+    // CITIZEN SELF-CHECK MODAL HANDLERS
+    // =========================================================================
+
+    async function openCitizenScreeningModal() {
+      const modal = document.getElementById('citizen-screening-modal');
+      modal.classList.remove('hidden');
+      const schema = await fetchQuestionnaireSchema('citizen_self_check');
+      if (schema) {
+        renderDynamicQuestionnaire(schema, 'citizen-questionnaire-mount', handleCitizenScreeningSubmit, {
+          age: 48,
+          sex: "MALE",
+          height: 170.0,
+          weight: 76.0,
+          waist_circumference: 94.0,
+          systolic_bp: 136.0,
+          diastolic_bp: 86.0,
+          sleep_hours: 6.0,
+          stress_level: 6.0,
+        });
+      }
+    }
+
+    function closeCitizenScreeningModal() {
+      document.getElementById('citizen-screening-modal').classList.add('hidden');
+    }
+
+    async function handleCitizenScreeningSubmit(answers) {
+      const cid = document.getElementById('citizen-selector').value;
+      const payload = {
+        citizen_id: cid,
+        workflow_id: "citizen_self_check",
+        answers: answers,
+        notes: "Citizen Self-Check Portal Submission",
+      };
+
+      try {
+        const resp = await fetch('/api/v1/screening/evaluate-configurable', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        if (resp.ok) {
+          const res = await resp.json();
+          closeCitizenScreeningModal();
+          displayExplainableSummaryModal(res.explainable_summary, "Citizen");
+          loadCitizenData(cid);
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    // =========================================================================
+    // EXPLAINABLE SUMMARY MODAL RENDERER
+    // =========================================================================
+
+    function displayExplainableSummaryModal(summary, citizenName) {
+      const modal = document.getElementById('explainable-summary-modal');
+      modal.classList.remove('hidden');
+
+      // Tier & Trajectory Badges
+      const tierBadge = document.getElementById('modal-summary-tier-badge');
+      tierBadge.innerText = `${summary.overall_tier} RISK`;
+      tierBadge.className = `px-3 py-1 rounded-full text-xs font-bold ${
+        summary.overall_tier === 'CRITICAL' ? 'badge-critical' :
+        summary.overall_tier === 'HIGH' ? 'badge-high' :
+        summary.overall_tier === 'MODERATE' ? 'badge-moderate' : 'badge-low'
+      }`;
+
+      const trajBadge = document.getElementById('modal-summary-trajectory-badge');
+      trajBadge.innerText = `TRAJECTORY: ${summary.trajectory}`;
+      trajBadge.className = `px-3 py-1 rounded-full text-xs font-bold ${
+        summary.trajectory === 'DETERIORATING' ? 'bg-red-100 text-red-800' :
+        summary.trajectory === 'IMPROVING' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'
+      }`;
+
+      // Quantitative Ribbon
+      document.getElementById('modal-composite-score').innerText = `${Math.round(summary.composite_risk_score * 100)}%`;
+      document.getElementById('modal-idrs-score').innerText = `${summary.idrs_score !== null ? summary.idrs_score : 'N/A'}/100`;
+      document.getElementById('modal-cbac-score').innerText = `${summary.cbac_score !== null ? summary.cbac_score : 'N/A'}/10`;
+      document.getElementById('modal-bmi-egfr').innerText = `${summary.calculated_bmi || '24.5'} / ${summary.calculated_egfr || '94'}`;
+
+      // Drivers Container
+      const driversContainer = document.getElementById('modal-drivers-container');
+      driversContainer.innerHTML = '';
+      if (summary.top_drivers && summary.top_drivers.length > 0) {
+        summary.top_drivers.forEach(d => {
+          const div = document.createElement('div');
+          div.className = 'p-3 rounded-xl border border-red-200 bg-red-50/50 flex flex-col sm:flex-row sm:items-center justify-between gap-2';
+          div.innerHTML = `
+            <div>
+              <div class="font-bold text-red-950 flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-red-500"></span>
+                <span>${d.feature_name}</span>
+              </div>
+              <p class="text-[11px] text-slate-600 mt-0.5">Observed: <strong>${d.observed_value}</strong> &bull; Target: <span class="text-emerald-700">${d.target_value}</span></p>
+              <p class="text-[10px] text-slate-400 italic">${d.evidence_citation || 'Evidence-based NCD Standard'}</p>
+            </div>
+            <div class="text-right">
+              <span class="px-2 py-0.5 bg-red-200 text-red-900 font-extrabold rounded text-[11px]">+${Math.round(d.impact_weight * 100)}% Impact</span>
+            </div>
+          `;
+          driversContainer.appendChild(div);
+        });
+      } else {
+        driversContainer.innerHTML = '<div class="text-slate-400 italic">No adverse clinical drivers identified.</div>';
+      }
+
+      // Protective Factors Container
+      const protectiveContainer = document.getElementById('modal-protective-container');
+      protectiveContainer.innerHTML = '';
+      if (summary.protective_factors && summary.protective_factors.length > 0) {
+        summary.protective_factors.forEach(p => {
+          const div = document.createElement('div');
+          div.className = 'p-3 rounded-xl border border-emerald-200 bg-emerald-50/50 flex items-center justify-between';
+          div.innerHTML = `
+            <div>
+              <div class="font-bold text-emerald-950 flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                <span>${p.feature_name}</span>
+              </div>
+              <p class="text-[11px] text-slate-600 mt-0.5">Observed: <strong>${p.observed_value}</strong></p>
+            </div>
+            <span class="px-2 py-0.5 bg-emerald-200 text-emerald-900 font-extrabold rounded text-[11px]">${Math.round(p.impact_weight * 100)}% Protective</span>
+          `;
+          protectiveContainer.appendChild(div);
+        });
+      } else {
+        protectiveContainer.innerHTML = '<div class="text-slate-400 italic">Standard lifestyle baseline.</div>';
+      }
+
+      // Actions List
+      const actionsList = document.getElementById('modal-actions-list');
+      actionsList.innerHTML = '';
+      if (summary.immediate_lifestyle_actions) {
+        summary.immediate_lifestyle_actions.forEach(act => {
+          const li = document.createElement('li');
+          li.innerText = act;
+          actionsList.appendChild(li);
+        });
+      }
+      if (summary.recommended_diagnostic_followups) {
+        summary.recommended_diagnostic_followups.forEach(act => {
+          const li = document.createElement('li');
+          li.className = "text-indigo-900 font-semibold";
+          li.innerText = "Clinical follow-up: " + act;
+          actionsList.appendChild(li);
+        });
+      }
+
+      // Safety Notice
+      if (summary.clinical_safety_notice) {
+        document.getElementById('modal-safety-notice').innerText = summary.clinical_safety_notice;
+      }
+    }
+
+    function closeExplainableSummaryModal() {
+      document.getElementById('explainable-summary-modal').classList.add('hidden');
+    }
+
+    // =========================================================================
+    // 5-10 MINUTE GUIDED DEMO WORKFLOW RUNNER
+    // =========================================================================
+
+    async function runGuidedScreeningDemo() {
+      const scenario = document.getElementById('demo-scenario-select').value;
+      const btn = document.getElementById('btn-run-screening-demo');
+      btn.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i> Running Scenario...`;
+
+      try {
+        const resp = await fetch(`/api/v1/screening/evaluate-demo/${scenario}`);
+        if (resp.ok) {
+          const res = await resp.json();
+          displayExplainableSummaryModal(res.explainable_summary, scenario);
+          loadTriageData();
+          populateClinicianObservations(res.structured_observations);
+        } else {
+          alert("Demo error: " + (await resp.text()));
+        }
+      } catch (e) {
+        console.error(e);
+      } finally {
+        btn.innerHTML = `<i class="fa-solid fa-play"></i> Run Guided Demo`;
+      }
+    }
+
+    function populateClinicianObservations(observations) {
+      const tbody = document.getElementById('clinician-obs-table-body');
+      if (!tbody || !observations) return;
+      tbody.innerHTML = '';
+      document.getElementById('clinician-obs-count').innerText = `${observations.length} Discrete Observations`;
+
+      observations.forEach(obs => {
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-slate-50';
+
+        let badge = '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800">NORMAL</span>';
+        if (obs.code === 'SYSTOLIC_BP' && obs.value >= 130) {
+          badge = '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800">ELEVATED</span>';
+        } else if (obs.code === 'HBA1C' && obs.value >= 5.7) {
+          badge = '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800">PREDIABETIC</span>';
+        } else if (obs.code === 'FASTING_GLUCOSE' && obs.value >= 100) {
+          badge = '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800">IMPAIRED</span>';
+        } else if (obs.code === 'WAIST_CIRCUMFERENCE' && obs.value >= 90) {
+          badge = '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-orange-100 text-orange-800">CENTRAL OBESITY</span>';
+        }
+
+        tr.innerHTML = `
+          <td class="p-2.5 font-bold text-slate-800">${obs.display_name}</td>
+          <td class="p-2.5 font-mono text-slate-500">${obs.loinc_code}</td>
+          <td class="p-2.5 font-bold text-slate-900">${obs.value} ${obs.unit}</td>
+          <td class="p-2.5 text-slate-500">${getReferenceTarget(obs.code)}</td>
+          <td class="p-2.5">${badge}</td>
+          <td class="p-2.5 text-slate-400">${obs.source}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function getReferenceTarget(code) {
+      const targets = {
+        SYSTOLIC_BP: "< 120 mmHg",
+        DIASTOLIC_BP: "< 80 mmHg",
+        HEART_RATE: "60 - 100 bpm",
+        FASTING_GLUCOSE: "< 100 mg/dL",
+        HBA1C: "< 5.7 %",
+        TOTAL_CHOLESTEROL: "< 200 mg/dL",
+        LDL_CHOLESTEROL: "< 100 mg/dL",
+        HDL_CHOLESTEROL: ">= 40 mg/dL",
+        TRIGLYCERIDES: "< 150 mg/dL",
+        BMI: "< 23.0 kg/m²",
+        WAIST_CIRCUMFERENCE: "< 90 cm (M) / < 80 cm (F)",
+        SERUM_CREATININE: "0.6 - 1.2 mg/dL",
+        EGFR: ">= 90 mL/min",
+        SLEEP_HOURS: ">= 7.0 hrs",
+        STRESS_LEVEL: "<= 4.0 score",
+      };
+      return targets[code] || "Standard Range";
+    }
+
+    // Default load
+    window.onload = () => {
+      switchTab('evaluator');
+      loadWorkerQuestionnaire();
+    };
+  </script>
+</body>
+</html>

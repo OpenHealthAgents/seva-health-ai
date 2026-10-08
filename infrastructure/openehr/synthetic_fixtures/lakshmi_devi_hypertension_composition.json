@@ -1,0 +1,154 @@
+{
+  "_type": "COMPOSITION",
+  "name": {
+    "_type": "DV_TEXT",
+    "value": "Physical Vitals Screening Encounter"
+  },
+  "archetype_node_id": "openEHR-EHR-COMPOSITION.encounter.v1",
+  "archetype_details": {
+    "archetype_id": {
+      "value": "openEHR-EHR-COMPOSITION.encounter.v1"
+    },
+    "template_id": {
+      "value": "SevaHealth_Vitals_Screening_v1"
+    },
+    "rm_version": "1.0.4"
+  },
+  "language": {
+    "_type": "CODE_PHRASE",
+    "terminology_id": {
+      "value": "ISO_639-1"
+    },
+    "code_string": "en"
+  },
+  "territory": {
+    "_type": "CODE_PHRASE",
+    "terminology_id": {
+      "value": "ISO_3166-1"
+    },
+    "code_string": "IN"
+  },
+  "category": {
+    "_type": "DV_CODED_TEXT",
+    "value": "event",
+    "defining_code": {
+      "_type": "CODE_PHRASE",
+      "terminology_id": {
+        "value": "openehr"
+      },
+      "code_string": "433"
+    }
+  },
+  "composer": {
+    "_type": "PARTY_IDENTIFIED",
+    "name": "Sunita Devi (ASHA)"
+  },
+  "context": {
+    "_type": "EVENT_CONTEXT",
+    "start_time": {
+      "_type": "DV_DATE_TIME",
+      "value": "2026-10-06T07:48:05.689744+00:00"
+    },
+    "setting": {
+      "_type": "DV_CODED_TEXT",
+      "value": "primary medical care",
+      "defining_code": {
+        "_type": "CODE_PHRASE",
+        "terminology_id": {
+          "value": "openehr"
+        },
+        "code_string": "228"
+      }
+    },
+    "location": "Koppa Health Camp, Mandya"
+  },
+  "content": [
+    {
+      "_type": "OBSERVATION",
+      "archetype_node_id": "openEHR-EHR-OBSERVATION.blood_pressure.v2",
+      "name": {
+        "_type": "DV_TEXT",
+        "value": "Blood Pressure"
+      },
+      "language": {
+        "_type": "CODE_PHRASE",
+        "terminology_id": {
+          "value": "ISO_639-1"
+        },
+        "code_string": "en"
+      },
+      "encoding": {
+        "_type": "CODE_PHRASE",
+        "terminology_id": {
+          "value": "IANA_character-sets"
+        },
+        "code_string": "UTF-8"
+      },
+      "subject": {
+        "_type": "PARTY_SELF"
+      },
+      "data": {
+        "_type": "HISTORY",
+        "archetype_node_id": "at0001",
+        "name": {
+          "_type": "DV_TEXT",
+          "value": "history"
+        },
+        "origin": {
+          "_type": "DV_DATE_TIME",
+          "value": "2026-10-06T07:48:05.689744+00:00"
+        },
+        "events": [
+          {
+            "_type": "POINT_EVENT",
+            "archetype_node_id": "at0002",
+            "name": {
+              "_type": "DV_TEXT",
+              "value": "Any event"
+            },
+            "time": {
+              "_type": "DV_DATE_TIME",
+              "value": "2026-10-06T07:48:05.689744+00:00"
+            },
+            "data": {
+              "_type": "ITEM_TREE",
+              "archetype_node_id": "at0003",
+              "name": {
+                "_type": "DV_TEXT",
+                "value": "blood pressure"
+              },
+              "items": [
+                {
+                  "_type": "ELEMENT",
+                  "archetype_node_id": "at0004",
+                  "name": {
+                    "_type": "DV_TEXT",
+                    "value": "Systolic"
+                  },
+                  "value": {
+                    "_type": "DV_QUANTITY",
+                    "magnitude": 164.0,
+                    "units": "mmHg"
+                  }
+                },
+                {
+                  "_type": "ELEMENT",
+                  "archetype_node_id": "at0005",
+                  "name": {
+                    "_type": "DV_TEXT",
+                    "value": "Diastolic"
+                  },
+                  "value": {
+                    "_type": "DV_QUANTITY",
+                    "magnitude": 98.0,
+                    "units": "mmHg"
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ]
+}
