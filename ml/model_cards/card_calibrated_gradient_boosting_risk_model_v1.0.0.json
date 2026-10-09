@@ -1,0 +1,98 @@
+{
+  "model_name": "calibrated_gradient_boosting_risk_model",
+  "model_version": "v1.0.0",
+  "training_data_version": "v1.0.0",
+  "feature_version": "v1.0.0",
+  "evaluation_version": "v1.0.0",
+  "date_created": "2026-10-09",
+  "intended_use": {
+    "primary_purpose": "Demonstration early-warning cardiometabolic risk stratification for community health screenings.",
+    "target_users": [
+      "Community Health Workers (ASHAs)",
+      "Primary Care Nurses",
+      "Preventive Health Officers"
+    ],
+    "care_setting": "Community primary health centers and rural screening camps.",
+    "out_of_scope_uses": [
+      "Autonomous diagnosis of acute coronary syndrome or stroke.",
+      "Automated prescription or alteration of anti-hypertensive or anti-diabetic medication.",
+      "Standalone clinical decision-making without physician oversight."
+    ]
+  },
+  "limitations": [
+    "Trained and evaluated on synthetic demonstration cohorts simulating epidemiological distributions.",
+    "Does NOT incorporate serial ECG waveforms, continuous telemetry, or genomic polygenic risk scores.",
+    "Laboratory biomarker imputation assumes missingness patterns observed in demonstration data; extreme unmeasured covariates may degrade accuracy.",
+    "Predictions reflect statistical risk association rather than causal individual pathophysiology."
+  ],
+  "population": {
+    "age_range": "18 to 85 years",
+    "regions": [
+      "North-Rural",
+      "North-Urban",
+      "South-Rural",
+      "South-Urban",
+      "East-Rural",
+      "East-Urban",
+      "West-Rural",
+      "West-Urban"
+    ],
+    "prevalence": "5.8% positive event rate in cohort",
+    "inclusion_criteria": "Adults participating in preventive cardiometabolic health screening.",
+    "exclusion_criteria": "Active emergency symptoms (chest pain, shock), pregnancy, pediatric population (<18y)."
+  },
+  "features": [
+    "age",
+    "sex",
+    "demographic_group",
+    "bmi",
+    "systolic_bp",
+    "diastolic_bp",
+    "heart_rate",
+    "fasting_glucose",
+    "hba1c",
+    "total_cholesterol",
+    "hdl_cholesterol",
+    "ldl_cholesterol",
+    "triglycerides",
+    "serum_creatinine",
+    "smoking_status",
+    "physical_activity",
+    "family_history",
+    "mean_arterial_pressure",
+    "pulse_pressure",
+    "cholesterol_hdl_ratio",
+    "triglyceride_hdl_ratio",
+    "hypertension_stage",
+    "glycemic_risk_flag",
+    "metabolic_syndrome_score"
+  ],
+  "performance_summary": {
+    "overall_metrics": {
+      "auroc": 0.7554,
+      "auprc": 0.1737,
+      "sensitivity": 0.0,
+      "specificity": 1.0,
+      "ppv": 0.0,
+      "npv": 0.9425,
+      "brier_score": 0.0522,
+      "expected_calibration_error": 0.02,
+      "optimal_threshold": 0.05
+    },
+    "demographic_disparities": {
+      "sex_max_auroc_difference": 0.1455,
+      "sex_equal_opportunity_diff": 0.0,
+      "sex_demographic_parity_diff": 0.0,
+      "age_max_auroc_difference": 0.1996,
+      "demographic_group_max_auroc_difference": 0.359
+    },
+    "missingness_summary": "Under 75% synthetic feature missingness, the model retains 93.4% of baseline discrimination (AUROC 0.706 vs baseline 0.755). Complete loss of laboratory panels incurs an AUROC change of -0.033."
+  },
+  "known_risks": [
+    "Risk of False Negatives: Patient with atypical presentation may receive Low Risk rating, delaying clinical referral.",
+    "Risk of False Positives: Healthy patient flagged as High Risk may experience psychological distress and unnecessary secondary care referral.",
+    "Demographic Disparity: Resource-constrained rural clinics lacking point-of-care lab tests will experience moderate sensitivity drop.",
+    "Over-reliance / Automation Bias: Clinicians must not treat risk scores as definitive diagnostic findings."
+  ],
+  "clinical_validation_disclaimer": "DO NOT CLAIM CLINICAL VALIDATION. This model is a research prototype developed for decision-support exploration in community screening settings. It has NOT undergone clinical trials, has not received regulatory clearance (such as FDA 510(k), CE-IVD, or CDSCO MD-42), and is strictly prohibited from autonomous clinical triage, acute diagnosis, or medication dosing."
+}

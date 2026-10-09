@@ -149,4 +149,5 @@ class DeidentifiedExportResponse(BaseModel):
     sample_size: int
     export_timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     deidentification_method: str = "Salted SHA-256 Pseudonymization + 5-Year Age Banding + Binning"
+    k_anonymity_guarantee: str = "k >= 10"
     records: List[DeidentifiedExportRow]

@@ -1,3 +1,8 @@
+# ==============================================================================
+# SevaHealth AI - Local Development Orchestration (docker-compose.dev.yml)
+# Fast iteration: Live code reloading, minimal memory footprint, pinned tools
+# ==============================================================================
+
 version: "3.9"
 
 services:
@@ -6,30 +11,97 @@ services:
       context: .
       dockerfile: infrastructure/docker/Dockerfile.api
     container_name: sevahealth-api-dev
+    restart: unless-stopped
     ports:
       - "8000:8000"
     volumes:
       - .:/app
     environment:
       - ENVIRONMENT=development
-      - DATABASE_URL=sqlite:///./sevahealth.db
-      - REDIS_URL=redis://redis:6379/0
-      - AI_PROVIDER=MOCK
       - DEBUG=true
+      - DATABASE_URL=postgresql+psycopg://seva:seva_password@postgres-dev:5432/sevahealth_dev
+      - REDIS_URL=redis://redis-dev:6379/0
+      - AI_PROVIDER=MOCK
+      - S3_ENDPOINT=http://minio-dev:9000
+      - S3_ACCESS_KEY=minioadmin
+      - S3_SECRET_KEY=minioadmin
+      - S3_BUCKET_NAME=sevahealth-dev-vault
+      - LOG_LEVEL=DEBUG
     command: uvicorn services.api.main:app --host 0.0.0.0 --port 8000 --reload
     depends_on:
-      - redis
+      postgres-dev:
+        condition: service_healthy
+      redis-dev:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
     networks:
       - sevahealth-dev-network
 
-  redis:
-    image: redis:7-alpine
+  postgres-dev:
+    image: postgres:16.3-alpine
+    container_name: sevahealth-postgres-dev
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: seva
+      POSTGRES_PASSWORD: seva_password
+      POSTGRES_DB: sevahealth_dev
+    volumes:
+      - postgres-dev-data:/var/lib/postgresql/data
+      - ./infrastructure/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+      - ./infrastructure/postgres/migrations:/docker-entrypoint-initdb.d/migrations:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U seva -d sevahealth_dev"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - sevahealth-dev-network
+
+  redis-dev:
+    image: redis:7.2.5-alpine
     container_name: sevahealth-redis-dev
+    restart: unless-stopped
     ports:
       - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - sevahealth-dev-network
+
+  minio-dev:
+    image: minio/minio:RELEASE.2024-05-10T01-41-38Z
+    container_name: sevahealth-minio-dev
+    restart: unless-stopped
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    command: server /data --console-address ":9001"
+    volumes:
+      - minio-dev-data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
     networks:
       - sevahealth-dev-network
 
 networks:
   sevahealth-dev-network:
     driver: bridge
+
+volumes:
+  postgres-dev-data:
+  minio-dev-data:

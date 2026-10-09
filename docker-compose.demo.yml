@@ -1,0 +1,176 @@
+# ==============================================================================
+# SevaHealth AI - Challenge Demo Mode Orchestration (docker-compose.demo.yml)
+# Ready in < 2 minutes: Pre-seeded synthetic personas, instant evaluation stack
+# All images strictly pinned to stable releases
+# ==============================================================================
+
+version: "3.9"
+
+services:
+  # ----------------------------------------------------------------------------
+  # 1. Reverse Proxy & Unified Gateway
+  # ----------------------------------------------------------------------------
+  demo-reverse-proxy:
+    image: nginx:1.27.0-alpine
+    container_name: sevahealth-demo-proxy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    volumes:
+      - ./infrastructure/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      demo-api:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:80/nginx-health || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - sevahealth-demo-network
+
+  # ----------------------------------------------------------------------------
+  # 2. SevaHealth API & Demo Orchestrator
+  # ----------------------------------------------------------------------------
+  demo-api:
+    build:
+      context: .
+      dockerfile: infrastructure/docker/Dockerfile.api
+    container_name: sevahealth-demo-api
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - ENVIRONMENT=demo
+      - DEBUG=false
+      - DATABASE_URL=postgresql+psycopg://seva:seva_password@demo-postgres:5432/sevahealth_db
+      - REDIS_URL=redis://demo-redis:6379/0
+      - S3_ENDPOINT=http://demo-minio:9000
+      - S3_ACCESS_KEY=minioadmin
+      - S3_SECRET_KEY=minioadmin
+      - S3_BUCKET_NAME=sevahealth-medical-vault
+      - AI_PROVIDER=MOCK
+      - LOG_LEVEL=INFO
+    depends_on:
+      demo-postgres:
+        condition: service_healthy
+      demo-redis:
+        condition: service_healthy
+      demo-minio:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
+    networks:
+      - sevahealth-demo-network
+
+  # ----------------------------------------------------------------------------
+  # 3. Demo Async Worker
+  # ----------------------------------------------------------------------------
+  demo-worker:
+    build:
+      context: .
+      dockerfile: infrastructure/docker/Dockerfile.worker
+    container_name: sevahealth-demo-worker
+    restart: unless-stopped
+    ports:
+      - "8002:8002"
+    environment:
+      - ENVIRONMENT=demo
+      - DATABASE_URL=postgresql+psycopg://seva:seva_password@demo-postgres:5432/sevahealth_db
+      - REDIS_URL=redis://demo-redis:6379/0
+      - S3_ENDPOINT=http://demo-minio:9000
+      - S3_ACCESS_KEY=minioadmin
+      - S3_SECRET_KEY=minioadmin
+      - S3_BUCKET_NAME=sevahealth-medical-vault
+      - WORKER_CONCURRENCY=2
+    depends_on:
+      demo-postgres:
+        condition: service_healthy
+      demo-redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8002/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - sevahealth-demo-network
+
+  # ----------------------------------------------------------------------------
+  # 4. Demo PostgreSQL Database
+  # ----------------------------------------------------------------------------
+  demo-postgres:
+    image: postgres:16.3-alpine
+    container_name: sevahealth-demo-postgres
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: seva
+      POSTGRES_PASSWORD: seva_password
+      POSTGRES_DB: sevahealth_db
+    volumes:
+      - demo-postgres-data:/var/lib/postgresql/data
+      - ./infrastructure/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+      - ./infrastructure/postgres/migrations:/docker-entrypoint-initdb.d/migrations:ro
+      - ./infrastructure/postgres/seeds:/docker-entrypoint-initdb.d/seeds:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U seva -d sevahealth_db"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - sevahealth-demo-network
+
+  # ----------------------------------------------------------------------------
+  # 5. Demo Redis Broker
+  # ----------------------------------------------------------------------------
+  demo-redis:
+    image: redis:7.2.5-alpine
+    container_name: sevahealth-demo-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - sevahealth-demo-network
+
+  # ----------------------------------------------------------------------------
+  # 6. Demo Object Storage (MinIO)
+  # ----------------------------------------------------------------------------
+  demo-minio:
+    image: minio/minio:RELEASE.2024-05-10T01-41-38Z
+    container_name: sevahealth-demo-minio
+    restart: unless-stopped
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    command: server /data --console-address ":9001"
+    volumes:
+      - demo-minio-data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - sevahealth-demo-network
+
+networks:
+  sevahealth-demo-network:
+    driver: bridge
+
+volumes:
+  demo-postgres-data:
+  demo-minio-data:

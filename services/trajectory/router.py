@@ -4,6 +4,7 @@ from fastapi.responses import HTMLResponse
 from datetime import datetime, timezone
 
 from packages.auth.jwt import get_current_user_token, TokenPayload
+from packages.auth.access_control import HealthcareAuthorizationEngine
 from packages.observability.audit import audit_logger
 from packages.types.enums import AuditAction
 from services.store import store
@@ -97,6 +98,7 @@ async def get_citizen_trajectory_report(
     citizen = store.get_citizen(citizen_id)
     if not citizen:
         raise HTTPException(status_code=404, detail="Citizen not found")
+    HealthcareAuthorizationEngine.enforce_citizen_access(current_user, citizen)
 
     snapshots = _ensure_citizen_has_snapshots(citizen_id)
     report = risk_trajectory_engine.evaluate_trajectory(citizen_id, snapshots)
@@ -125,6 +127,7 @@ async def get_domain_trajectory(
     citizen = store.get_citizen(citizen_id)
     if not citizen:
         raise HTTPException(status_code=404, detail="Citizen not found")
+    HealthcareAuthorizationEngine.enforce_citizen_access(current_user, citizen)
 
     domain_key = domain_name.lower().strip()
     valid_domains = [d.value for d in TrajectoryDomain]

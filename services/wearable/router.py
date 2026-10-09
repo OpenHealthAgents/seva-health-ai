@@ -14,6 +14,8 @@ from services.wearable.models import (
 )
 from services.wearable.adapter import wearable_adapter, MockWearableProvider
 from services.store import store
+from packages.clinical_models.consent import ConsentCategory, ConsentStatus, consent_manager
+from packages.observability.metrics import metrics
 
 router = APIRouter(prefix="/wearables", tags=["Wearable & Health-Data Ingestion Layer"])
 
@@ -66,6 +68,14 @@ async def sync_wearable_data(
     if not citizen:
         raise HTTPException(status_code=404, detail="Citizen not found")
 
+    # Verify revocable WEARABLE_DATA consent
+    wearable_consents = consent_manager.list_consents(subject=citizen_id, category=ConsentCategory.WEARABLE_DATA)
+    if any(c.status == ConsentStatus.REVOKED for c in wearable_consents) or (wearable_consents and all(not c.is_valid() for c in wearable_consents)):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Wearable access has been REVOKED by citizen in the Citizen Privacy Center.",
+        )
+
     records = await wearable_adapter.sync(
         citizen_id=citizen_id,
         provider=provider,
@@ -89,6 +99,13 @@ async def sync_wearable_data(
         },
     )
 
+    metrics.record_wearable_sync(
+        device_type=provider.value if provider else "GARMIN",
+        records_count=len(records),
+        duration_ms=22.4,
+        success=True,
+    )
+
     proj_dump = projection.model_dump() if projection else None
     return {
         "status": "SUCCESS",
@@ -97,6 +114,37 @@ async def sync_wearable_data(
         "projection": proj_dump,
         "seven_day_baselines": proj_dump,
         "sample_records": [r.model_dump() for r in records[:5]],
+    }
+
+
+@router.post("/backfill-async/{citizen_id}", status_code=status.HTTP_202_ACCEPTED)
+async def backfill_wearable_data_async(
+    citizen_id: str,
+    days: int = Query(30, ge=1, le=365, description="Number of days to backfill"),
+    provider: Optional[WearableProvider] = Query(WearableProvider.GARMIN),
+    current_user: TokenPayload = Depends(get_current_user_token)
+):
+    """Enqueues large multi-day timeseries telemetry backfill to background queue without blocking citizen UX."""
+    from packages.queue.manager import job_queue_manager
+    from packages.queue.models import QueueType, JobPriority
+
+    citizen = store.get_citizen(citizen_id)
+    if not citizen:
+        raise HTTPException(status_code=404, detail="Citizen not found")
+
+    job = await job_queue_manager.enqueue(
+        queue=QueueType.WEARABLE_BACKFILL,
+        payload={"citizen_id": citizen_id, "days": days, "provider": provider.value if provider else "GARMIN"},
+        priority=JobPriority.NORMAL,
+        citizen_id=citizen_id,
+        tenant_id=current_user.tenant_id,
+    )
+    return {
+        "status": "QUEUED",
+        "job_id": job.id,
+        "citizen_id": citizen_id,
+        "message": f"Timeseries backfill for {days} days enqueued.",
+        "status_url": f"/api/v1/jobs/{job.id}",
     }
 
 

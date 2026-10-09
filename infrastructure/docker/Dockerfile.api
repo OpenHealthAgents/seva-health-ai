@@ -1,27 +1,46 @@
+# ==============================================================================
+# SevaHealth AI - API Gateway Production Container
+# Base Image: Python 3.12 Slim (Debian Bookworm) - Pinned
+# Security: Non-root execution, vulnerability minimized, healthcheck enabled
+# ==============================================================================
+
 FROM python:3.12-slim
+
+# Set environment flags
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PYTHONPATH=/app
 
 WORKDIR /app
 
-# Install system dependencies for cryptography and health checks
+# Install minimal OS dependencies for network, health checks, and cryptography
 RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
-    build-essential \
     libpq-dev \
+    gcc \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy project manifests and install dependencies
-COPY pyproject.toml .
-RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir -e .
+# Install pinned production dependencies
+COPY requirements-prod.txt .
+RUN pip install --no-cache-dir --upgrade pip==24.3.1 && \
+    pip install --no-cache-dir -r requirements-prod.txt
 
-# Copy application source code
+# Create non-root application user for container isolation
+RUN groupadd -r seva && useradd -r -g seva -d /app -s /sbin/nologin seva
+
+# Copy application codebase
 COPY . .
 
-# Expose API gateway port
+# Ensure non-root ownership
+RUN chown -R seva:seva /app
+
+USER seva
+
+# Expose HTTP API Port
 EXPOSE 8000
 
-# Health check probe
-HEALTHCHECK --interval=10s --timeout=5s --start-period=5s --retries=3 \
+# Container Healthcheck Probe
+HEALTHCHECK --interval=10s --timeout=5s --start-period=10s --retries=3 \
     CMD curl -f http://localhost:8000/health || exit 1
 
-CMD ["uvicorn", "services.api.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "services.api.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "2"]

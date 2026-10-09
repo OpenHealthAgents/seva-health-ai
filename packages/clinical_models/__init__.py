@@ -14,6 +14,14 @@ from packages.clinical_models.fhir import (
     export_observation_fhir_r4,
     export_risk_assessment_fhir_r4,
 )
+from packages.clinical_models.consent import (
+    ConsentCategory,
+    ConsentStatus,
+    ConsentAuditEvent,
+    HealthcareConsent,
+    ConsentManager,
+    consent_manager,
+)
 
 from packages.clinical_models.domain_models import (
     ProvenanceRecord,

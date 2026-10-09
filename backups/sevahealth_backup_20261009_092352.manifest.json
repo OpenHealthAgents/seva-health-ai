@@ -1,0 +1,10 @@
+{
+  "backup_name": "sevahealth_backup_20261009_092352",
+  "timestamp_utc": "2026-10-09T09:23:52.081129+00:00",
+  "archive_file": "sevahealth_backup_20261009_092352.sql.gz",
+  "size_bytes": 366,
+  "sha256_checksum": "5620db573a8060eaad58f418c7e1f44875e401c51ce30f8d7d5336c8e3758677",
+  "app_version": "0.1.0",
+  "environment": "development",
+  "status": "VERIFIED_COMPLETED"
+}

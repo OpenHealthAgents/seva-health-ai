@@ -135,7 +135,7 @@
       margin-bottom: 8px;
     }
 
-    /* The 3 Core Question Banners */
+    /* The 4 Core Question Banners */
     .how-doing-banner {
       background: linear-gradient(135deg, #fef3c7 0%, #fffbeb 100%);
       border: 1px solid #fde68a;
@@ -154,10 +154,17 @@
       border-radius: 24px;
       padding: 18px;
     }
+    .need-help-banner {
+      background: linear-gradient(135deg, #fee2e2 0%, #fff1f2 100%);
+      border: 1px solid #fecdd3;
+      border-radius: 24px;
+      padding: 18px;
+    }
 
-    /* Buttons */
+    /* Buttons (Large Touch Targets >= 48px) */
     .btn {
       width: 100%;
+      min-height: 48px;
       padding: 12px 16px;
       border-radius: 14px;
       font-size: 14px;
@@ -206,6 +213,7 @@
     .form-label { display: block; font-size: 12px; font-weight: 700; color: var(--text-muted); margin-bottom: 4px; }
     .form-input, .form-select {
       width: 100%;
+      min-height: 48px;
       padding: 10px 14px;
       border-radius: 12px;
       border: 1px solid var(--border);
@@ -220,13 +228,14 @@
       border-top: 1px solid var(--border);
       display: grid;
       grid-template-columns: repeat(5, 1fr);
-      padding: 8px 4px 12px;
+      padding: 6px 4px 10px;
       z-index: 30;
     }
     .nav-tab {
       display: flex;
       flex-direction: column;
       align-items: center;
+      justify-content: center;
       gap: 3px;
       color: var(--text-muted);
       font-size: 10px;
@@ -234,6 +243,7 @@
       border: none;
       background: none;
       cursor: pointer;
+      min-height: 48px;
       padding: 4px 0;
     }
     .nav-tab.active {
@@ -312,6 +322,11 @@
       <span style="font-size: 10px; background: #e0f2fe; padding: 2px 6px; border-radius: 4px; color: var(--primary);">2.0</span>
     </div>
     <div style="display: flex; gap: 8px; align-items: center;">
+      <div class="lang-pill-group" style="display: flex; background: #e2e8f0; border-radius: 999px; overflow: hidden; padding: 2px;">
+        <button id="btn-lang-en" class="lang-btn active" onclick="setLanguage('en')" style="border: none; background: #0284c7; color: white; padding: 4px 8px; font-size: 11px; font-weight: 700; cursor: pointer; border-radius: 999px;">EN</button>
+        <button id="btn-lang-hi" class="lang-btn" onclick="setLanguage('hi')" style="border: none; background: transparent; padding: 4px 8px; font-size: 11px; font-weight: 700; cursor: pointer;">हिंदी</button>
+        <button id="btn-lang-kn" class="lang-btn" onclick="setLanguage('kn')" style="border: none; background: transparent; padding: 4px 8px; font-size: 11px; font-weight: 700; cursor: pointer;">ಕನ್ನಡ</button>
+      </div>
       <button class="lang-pill" onclick="cycleLanguage()">
         <i class="fa-solid fa-language"></i> <span id="currentLangLabel">English</span>
       </button>
@@ -420,24 +435,66 @@
   const I18N = {
     en: {
       lang: "English",
+      q1Title: "1. HOW AM I DOING?",
       doingHeadline: "You are doing Fair! Sugar needs a little care.",
       doingVoice: "Namaste Ramesh ji. Your health score is steady. Blood sugar is mildly high, but your daily walking has improved by 1,400 steps.",
-      changingText: "Walking increased by 20%. Sugar is steady.",
-      todoText: "Walk 15 mins after lunch and drink water."
+      doingDetails: "Your body is responding well to morning walks. Keep salt low and eat millets instead of white rice to bring sugar down.",
+      q2Title: "2. WHAT CHANGED?",
+      changingBadge: "Past 14 Days",
+      changingHeadline: "Walking increased by 20%. Sugar is steady.",
+      changingBullet1: "Daily walking is up by +1,400 steps (Active habitforming).",
+      changingBullet2: "Fasting sugar decreased from 124 mg/dL down to 118 mg/dL.",
+      q3Title: "3. WHAT SHOULD I DO TODAY?",
+      q3Completed: "Completed",
+      q4Title: "4. DO I NEED PROFESSIONAL HELP?",
+      q4Badge: "Routine Care Active",
+      q4Headline: "No Emergency Visit Needed Today",
+      q4Subtext: "Your vitals are stable for home management. We recommend a routine follow-up with your local ASHA worker within 14 days to recheck resting blood pressure.",
+      callAshaBtn: "Call ASHA Sunita",
+      bookDocBtn: "Book PHC Checkup",
+      emergencyBtn: "Emergency 108"
     },
     hi: {
       lang: "हिंदी",
+      q1Title: "1. मेरी सेहत कैसी है?",
       doingHeadline: "आपकी सेहत ठीक है! शुगर पर थोड़ा ध्यान दें।",
       doingVoice: "नमस्ते रमेश जी। आपकी सेहत स्थिर है। ब्लड शुगर हल्का बढ़ा है, लेकिन आपका चलना 1400 कदम बेहतर हुआ है।",
-      changingText: "चलना 20% बढ़ा। शुगर नियंत्रण में।",
-      todoText: "दोपहर के खाने के बाद 15 मिनट टहलें।"
+      doingDetails: "सुबह की सैर से आपके शरीर में अच्छा सुधार है। नमक कम रखें और सफेद चावल की जगह बाजरा या रागी खाएं।",
+      q2Title: "2. क्या बदलाव आया?",
+      changingBadge: "पिछले 14 दिन",
+      changingHeadline: "चलना 20% बढ़ा। शुगर नियंत्रण में।",
+      changingBullet1: "दैनिक चलना +1,400 कदम बढ़ा (सक्रिय स्वास्थ्य आदत)।",
+      changingBullet2: "सुबह की खाली पेट शुगर 124 से घटकर 118 mg/dL हुई।",
+      q3Title: "3. आज मुझे क्या करना चाहिए?",
+      q3Completed: "पूरा हुआ",
+      q4Title: "4. क्या मुझे डॉक्टर की मदद चाहिए?",
+      q4Badge: "सामान्य देखभाल",
+      q4Headline: "आज किसी आपातकालीन डॉक्टर की आवश्यकता नहीं है",
+      q4Subtext: "आपके लक्षण स्थिर हैं। रक्तचाप की नियमित जांच के लिए अगले 14 दिनों में अपनी आशा कार्यकर्ता से मिलें।",
+      callAshaBtn: "आशा कार्यकर्ता को कॉल करें",
+      bookDocBtn: "पीएचसी में पर्ची बनाएं",
+      emergencyBtn: "आपातकाल 108"
     },
     kn: {
       lang: "ಕನ್ನಡ",
-      doingHeadline: "ನಿಮ್ಮ ಆರೋಗ್ಯ ಉತ್ತಮವಾಗಿದೆ! ಸಕ್ಕರೆ ಅಂಶದ ಬಗ್ಗೆ ಸ್ವಲ್ಪ ಗಮನವಿರಲಿ.",
+      q1Title: "1. ನನ್ನ ಆರೋಗ್ಯ ಹೇಗಿದೆ?",
+      doingHeadline: "ನಿಮ್ಮ ಆರೋಗ್ಯ ಉತ್ತಮವಾಗಿದೆ! ಸಕ್ಕರೆ ಬಗ್ಗೆ ಸ್ವಲ್ಪ ಕಾಳಜಿ ಇರಲಿ.",
       doingVoice: "ನಮಸ್ಕಾರ ರಮೇಶ್ ಅವರೇ. ನಿಮ್ಮ ರಕ್ತದ ಸಕ್ಕರೆ ಸ್ವಲ್ಪ ಹೆಚ್ಚಾಗಿದೆ, ಆದರೆ ನಡಿಗೆ 1400 ಹೆಜ್ಜೆ ಹೆಚ್ಚಾಗಿದೆ.",
-      changingText: "ನಡಿಗೆ 20% ಹೆಚ್ಚಳವಾಗಿದೆ. ಸಕ್ಕರೆ ಸ್ಥಿರವಾಗಿದೆ.",
-      todoText: "ಊಟದ ನಂತರ 15 ನಿಮಿಷ ನಡೆದಾಡಿ."
+      doingDetails: "ಬೆಳಗಿನ ನಡಿಗೆಯಿಂದ ಒಳ್ಳೆಯ ಸುಧಾರಣೆ ಕಂಡುಬರುತ್ತಿದೆ. ಬಿಳಿ ಅನ್ನದ ಬದಲು ರಾಗಿ ಮುದ್ದೆ ಸೇವಿಸಿ ಮತ್ತು ಉಪ್ಪು ಕಡಿಮೆ ಮಾಡಿ.",
+      q2Title: "2. ಏನು ಬದಲಾಗಿದೆ?",
+      changingBadge: "ಕಳೆದ 14 ದಿನಗಳು",
+      changingHeadline: "ನಡಿಗೆ 20% ಹೆಚ್ಚಳವಾಗಿದೆ. ಸಕ್ಕರೆ ಸ್ಥಿರವಾಗಿದೆ.",
+      changingBullet1: "ದೈನಂದಿನ ನಡಿಗೆ +1,400 ಹೆಜ್ಜೆಗಳಷ್ಟು ಹೆಚ್ಚಾಗಿದೆ (ಉತ್ತಮ ಅಭ್ಯಾಸ).",
+      changingBullet2: "ಬೆಳಗಿನ ಸಕ್ಕರೆ ಮಟ್ಟ 124 ರಿಂದ 118 mg/dL ಗೆ ಇಳಿದಿದೆ.",
+      q3Title: "3. ಇಂದು ನಾನು ಏನು ಮಾಡಬೇಕು?",
+      q3Completed: "ಪೂರ್ಣಗೊಂಡಿದೆ",
+      q4Title: "4. ನನಗೆ ವೈದ್ಯರ ಸಹಾಯ ಬೇಕೆ?",
+      q4Badge: "ಸಾಮಾನ್ಯ ಆರೈಕೆ",
+      q4Headline: "ಇಂದು ತುರ್ತು ವೈದ್ಯರ ಭೇಟಿಯ ಅಗತ್ಯವಿಲ್ಲ",
+      helpSubtext: "ನಿಮ್ಮ ಆರೋಗ್ಯ ಸ್ಥಿತಿ ನಿಯಂತ್ರಣದಲ್ಲಿದೆ. ರಕ್ತದೊತ್ತಡ ಮರುಪರಿಶೀಲಿಸಲು 14 ದಿನಗಳೊಳಗೆ ನಿಮ್ಮ ಆಶಾ ಕಾರ್ಯಕರ್ತೆಯನ್ನು ಸಂಪರ್ಕಿಸಿ.",
+      callAshaBtn: "ಆಶಾ ಕಾರ್ಯಕರ್ತೆಗೆ ಕರೆ ಮಾಡಿ",
+      bookDocBtn: "ಪಿಎಚ್‌ಸಿ ಭೇಟಿ ಕಾಯ್ದಿರಿಸಿ",
+      emergencyBtn: "ತುರ್ತು 108"
     }
   };
 
@@ -446,12 +503,25 @@
     renderCurrentScreen();
   });
 
+  function setLanguage(lang) {
+    state.language = lang;
+    document.querySelectorAll('.lang-btn').forEach(b => {
+      b.style.background = 'transparent';
+      b.style.color = 'inherit';
+    });
+    const activeBtn = document.getElementById('btn-lang-' + lang);
+    if (activeBtn) {
+      activeBtn.style.background = '#0284c7';
+      activeBtn.style.color = '#fff';
+    }
+    document.getElementById('currentLangLabel').textContent = I18N[state.language].lang;
+    renderCurrentScreen();
+  }
+
   function cycleLanguage() {
     const order = ["en", "hi", "kn"];
     let nextIdx = (order.indexOf(state.language) + 1) % order.length;
-    state.language = order[nextIdx];
-    document.getElementById('currentLangLabel').textContent = I18N[state.language].lang;
-    renderCurrentScreen();
+    setLanguage(order[nextIdx]);
   }
 
   function gotoScreen(id) {
@@ -493,7 +563,28 @@
   }
 
   function speakText(txt) {
-    alert("🔊 Voice Read-Aloud:\n\n" + (txt || I18N[state.language].doingVoice));
+    const textToSpeak = txt || I18N[state.language].doingVoice;
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(textToSpeak);
+      if (state.language === 'hi') utterance.lang = 'hi-IN';
+      else if (state.language === 'kn') utterance.lang = 'kn-IN';
+      else utterance.lang = 'en-IN';
+      window.speechSynthesis.speak(utterance);
+    }
+    alert("🔊 Voice Read-Aloud (" + I18N[state.language].lang + "):\n\n" + textToSpeak);
+  }
+
+  function callAshaWorker() {
+    alert("📞 Connecting to ASHA Worker Sunita (+91 98451 00012)...\n\nTopic: Routine 14-day blood pressure checkup & dietary guidance.");
+  }
+
+  function bookPhcVisit() {
+    alert("🏥 Primary Health Centre (PHC) Visit Booked!\n\nFacility: Kuvempunagar PHC / Devanahalli CHC\nDoctor: Dr. Anand Kulkarni, MD\nScheduled: Tuesday 10:00 AM (Token #42)");
+  }
+
+  function callEmergency108() {
+    alert("🚨 Emergency 108 Helpline.\n\nIf experiencing severe chest pain, sudden breathlessness, or speech difficulty, call 108 immediately!");
   }
 
   function toggleTask(id) {
@@ -698,17 +789,17 @@
         break;
 
       // -------------------------------------------------------------
-      // 6. HEALTH DASHBOARD (HOME SCREEN) - ANSWERS THE 3 QUESTIONS
+      // 6. HEALTH DASHBOARD (HOME SCREEN) - ANSWERS THE 4 CORE QUESTIONS
       // -------------------------------------------------------------
       case 6:
         c.innerHTML = `
           <!-- Question 1: How am I doing? -->
-          <div class="how-doing-banner">
+          <div class="how-doing-banner" id="question-how-doing" role="region" aria-label="Health Status">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
               <span style="font-size: 11px; font-weight: 800; color: #92400e; letter-spacing: 0.5px;">
-                <i class="fa-solid fa-heart-pulse"></i> HOW AM I DOING?
+                <i class="fa-solid fa-heart-pulse"></i> ${t.q1Title}
               </span>
-              <button class="audio-btn" onclick="speakText()">
+              <button class="audio-btn" onclick="speakText()" aria-label="Listen to health summary">
                 <i class="fa-solid fa-volume-high"></i> Listen
               </button>
             </div>
@@ -716,70 +807,97 @@
               ${t.doingHeadline}
             </h3>
             <p style="font-size: 12px; color: #92400e; line-height: 1.5; margin-bottom: 12px;">
-              Your body is responding well to morning walks. Keep salt low and eat millets instead of white rice to bring sugar down.
+              ${t.doingDetails}
             </p>
-            <div style="display: flex; gap: 8px;">
+            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
               <span class="badge badge-amber"><i class="fa-solid fa-circle"></i> Sugar: Watch</span>
               <span class="badge badge-amber"><i class="fa-solid fa-circle"></i> BP: 138/88</span>
               <span class="badge badge-green"><i class="fa-solid fa-check"></i> Walking: Good</span>
             </div>
           </div>
 
-          <!-- Question 2: What's changing? -->
-          <div class="changing-banner">
+          <!-- Question 2: What changed? -->
+          <div class="changing-banner" id="question-what-changed" role="region" aria-label="Recent Changes">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
               <span style="font-size: 11px; font-weight: 800; color: #0369a1; letter-spacing: 0.5px;">
-                <i class="fa-solid fa-arrow-trend-up"></i> WHAT'S CHANGING?
+                <i class="fa-solid fa-arrow-trend-up"></i> ${t.q2Title}
               </span>
-              <span class="badge badge-green" style="font-size: 10px;">Past 14 Days</span>
+              <span class="badge badge-green" style="font-size: 10px;">${t.changingBadge}</span>
             </div>
             <div style="font-size: 13px; font-weight: 700; color: #0c4a6e; margin-bottom: 4px;">
-              ${t.changingText}
+              ${t.changingHeadline}
             </div>
             <div style="font-size: 11px; color: #0369a1; line-height: 1.5;">
-              • Daily walking is up by <strong>+1,400 steps</strong> (Active habitforming).<br>
-              • Fasting sugar decreased from 124 mg/dL down to 118 mg/dL.
+              • ${t.changingBullet1}<br>
+              • ${t.changingBullet2}
             </div>
           </div>
 
           <!-- Question 3: What should I do today? -->
-          <div class="today-do-banner">
+          <div class="today-do-banner" id="question-what-today" role="region" aria-label="Today Actions">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
               <span style="font-size: 11px; font-weight: 800; color: #065f46; letter-spacing: 0.5px;">
-                <i class="fa-solid fa-calendar-check"></i> WHAT SHOULD I DO TODAY?
+                <i class="fa-solid fa-calendar-check"></i> ${t.q3Title}
               </span>
               <span style="font-size: 11px; font-weight: 700; color: #047857;">
-                ${state.todayTasks.filter(x => x.done).length} / 3 Completed
+                ${state.todayTasks.filter(x => x.done).length} / 3 ${t.q3Completed}
               </span>
             </div>
             <div style="display: flex; flex-direction: column; gap: 8px;">
               ${state.todayTasks.map(task => `
-                <div onclick="toggleTask(${task.id})" style="background: white; border-radius: 12px; padding: 10px 12px; display: flex; align-items: center; justify-content: space-between; border: 1px solid #a7f3d0; cursor: pointer;">
+                <div onclick="toggleTask(${task.id})" role="checkbox" aria-checked="${task.done}" tabindex="0" style="background: white; border-radius: 12px; min-height: 48px; padding: 10px 14px; display: flex; align-items: center; justify-content: space-between; border: 1px solid #a7f3d0; cursor: pointer;">
                   <div style="display: flex; align-items: center; gap: 10px;">
-                    <i class="fa-regular ${task.done ? 'fa-square-check' : 'fa-square'}" style="color: ${task.done ? 'var(--green)' : '#94a3b8'}; font-size: 18px;"></i>
+                    <i class="fa-regular ${task.done ? 'fa-square-check' : 'fa-square'}" style="color: ${task.done ? 'var(--green)' : '#94a3b8'}; font-size: 20px;"></i>
                     <span style="font-size: 12px; font-weight: 600; color: var(--text); ${task.done ? 'text-decoration: line-through; opacity: 0.6;' : ''}">
                       ${task.title}
                     </span>
                   </div>
-                  <span class="badge badge-green" style="font-size: 9px;">${task.tag}</span>
+                  <span class="badge badge-green" style="font-size: 10px;">${task.tag}</span>
                 </div>
               `).join('')}
             </div>
+          </div>
+
+          <!-- Question 4: Do I need professional help? -->
+          <div class="need-help-banner" id="question-need-help" role="region" aria-label="Professional Help Triage">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+              <span style="font-size: 11px; font-weight: 800; color: #991b1b; letter-spacing: 0.5px;">
+                <i class="fa-solid fa-stethoscope"></i> ${t.q4Title}
+              </span>
+              <span class="badge badge-green" style="font-size: 10px;">${t.q4Badge}</span>
+            </div>
+            <h3 style="font-size: 15px; font-weight: 800; color: #7f1d1d; margin-bottom: 4px;">
+              ${t.q4Headline}
+            </h3>
+            <p style="font-size: 12px; color: #991b1b; line-height: 1.5; margin-bottom: 12px;">
+              ${t.q4Subtext}
+            </p>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px;">
+              <button class="btn btn-teal" onclick="callAshaWorker()" style="min-height: 48px; font-size: 12px;">
+                <i class="fa-solid fa-phone"></i> ${t.callAshaBtn}
+              </button>
+              <button class="btn btn-primary" onclick="bookPhcVisit()" style="min-height: 48px; font-size: 12px;">
+                <i class="fa-solid fa-hospital-user"></i> ${t.bookDocBtn}
+              </button>
+            </div>
+            <button class="btn" onclick="callEmergency108()" style="min-height: 48px; background: #fee2e2; color: #991b1b; border: 1px solid #f87171; font-size: 12px;">
+              <i class="fa-solid fa-truck-medical"></i> ${t.emergencyBtn} (Toll-Free)
+            </button>
           </div>
 
           <!-- Quick Vitals Snapshot -->
           <div class="card">
             <div class="card-title"><i class="fa-solid fa-heart-pulse" style="color: var(--primary);"></i> Recent Readings</div>
             <div class="grid-2">
-              <div style="background: #f8fafc; padding: 10px; border-radius: 12px;">
+              <div style="background: #f8fafc; padding: 12px; border-radius: 12px;">
                 <div style="font-size: 11px; color: var(--text-muted);">Blood Pressure</div>
                 <div style="font-size: 18px; font-weight: 800; color: var(--text);">${state.vitals.bp} <span style="font-size: 11px; font-weight: 400;">mmHg</span></div>
                 <span class="badge badge-amber" style="margin-top: 4px;">Mild High</span>
               </div>
-              <div style="background: #f8fafc; padding: 10px; border-radius: 12px;">
+              <div style="background: #f8fafc; padding: 12px; border-radius: 12px;">
                 <div style="font-size: 11px; color: var(--text-muted);">Blood Sugar</div>
                 <div style="font-size: 18px; font-weight: 800; color: var(--text);">${state.vitals.sugar}</div>
-                <span class="badge badge-amber" style="margin-top: 4px;">Prediabetic</span>
+                <span class="badge badge-amber" style="margin-top: 4px;">Early Warning</span>
               </div>
             </div>
           </div>

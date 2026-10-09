@@ -1,0 +1,42 @@
+{
+  "dataset_name": "synthetic_ncd_cardiovascular_cohort",
+  "data_version": "v1.0.0",
+  "num_samples": 2000,
+  "num_features": 19,
+  "positive_rate": 0.0565,
+  "feature_names": [
+    "age",
+    "sex",
+    "demographic_group",
+    "height_cm",
+    "weight_kg",
+    "bmi",
+    "smoking_status",
+    "physical_activity",
+    "family_history",
+    "systolic_bp",
+    "diastolic_bp",
+    "heart_rate",
+    "fasting_glucose",
+    "hba1c",
+    "total_cholesterol",
+    "hdl_cholesterol",
+    "ldl_cholesterol",
+    "triglycerides",
+    "serum_creatinine"
+  ],
+  "demographic_groups": [
+    "South-Urban",
+    "South-Rural",
+    "East-Rural",
+    "North-Urban",
+    "North-Rural",
+    "West-Rural",
+    "East-Urban",
+    "West-Urban"
+  ],
+  "missing_rate_overall": 0.0318,
+  "checksum": "1597baaf53c32d46a61d2c0b8f89166fd2aa42cd71261152decc69b4222be8ba",
+  "created_at": "2026-10-08T19:05:13.315655",
+  "disclaimer": "RESEARCH DEMONSTRATION ONLY: Synthetic dataset generated for ML experimentation. Contains simulated clinical values. Not clinically validated."
+}

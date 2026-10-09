@@ -29,8 +29,8 @@ class CarePlan(BaseModel):
     adherence_percentage: float = 0.0 # Completed tasks / total tasks
     nutrition_guidance: str
     activity_guidance: str
-    sleep_guidance: str
-    stress_guidance: str
+    sleep_guidance: str = "Consistent 7-8 hours nightly sleep with screen cutoff 45 mins prior."
+    stress_guidance: str = "Daily 5-minute diaphragmatic breathing and stress reduction."
     daily_tasks: List[DailyTask] = []
     clinician_reviewed: bool = False
     clinician_id: Optional[str] = None

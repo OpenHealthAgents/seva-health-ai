@@ -1,0 +1,14 @@
+# ==============================================================================
+# SevaHealth AI - Grafana Datasource Auto-Provisioning
+# Base Image: grafana/grafana:11.0.0 (Pinned)
+# ==============================================================================
+
+apiVersion: 1
+
+datasources:
+  - name: Prometheus
+    type: prometheus
+    access: proxy
+    url: http://prometheus:9090
+    isDefault: true
+    editable: false

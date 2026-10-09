@@ -674,7 +674,11 @@ def seed_all_demo_data():
     ]
     store.set_trajectory_snapshots(p4.id, priya_snapshots)
 
-    print("  [OK] Seeded 4 synthetic personas (Ramesh Patel, Lakshmi Devi, Vikram Singh, Priya Sharma)")
+    # Seed complete 12 synthetic demo personas
+    from services.demo.personas import seed_all_synthetic_personas
+    seed_all_synthetic_personas()
+
+    print("  [OK] Seeded 12 comprehensive synthetic personas across all clinical NCD phenotypes")
     print("  [OK] Enqueued Lakshmi Devi into Clinician Triage Queue (EMERGENT)")
     print("  [OK] Populated 30-day care plan and 14-day wearable telemetry for Ramesh Patel")
     print("Seeding completed successfully!")

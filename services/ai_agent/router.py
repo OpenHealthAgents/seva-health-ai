@@ -1,6 +1,6 @@
 from typing import Dict, Any, List, Optional
 from fastapi import APIRouter, HTTPException, Depends
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from packages.auth.jwt import get_current_user_token, TokenPayload
 from packages.ai_schemas.schemas import LLMRiskExplanationOutput, LLMSOAPSummaryOutput
@@ -97,6 +97,45 @@ async def summarize_for_clinician(
         raise HTTPException(status_code=403, detail=str(pe))
     except Exception as exc:
         raise HTTPException(status_code=500, detail=f"Agent runtime error: {str(exc)}")
+
+
+class AsyncAIWorkflowRequest(BaseModel):
+    citizen_id: str
+    workflow_type: str = Field(default="SOAP_SUMMARY", description="SOAP_SUMMARY | MULTI_AGENT_SYNTHESIS | CARE_PLAN_EVALUATION")
+
+
+@router.post("/workflow-async", status_code=202)
+async def dispatch_ai_workflow_async(
+    payload: AsyncAIWorkflowRequest,
+    current_user: TokenPayload = Depends(get_current_user_token),
+):
+    """Enqueues computationally intensive multi-agent synthesis to background queue without blocking citizen UX."""
+    from packages.queue.manager import job_queue_manager
+    from packages.queue.models import QueueType, JobPriority
+
+    citizen = store.get_citizen(payload.citizen_id)
+    if not citizen:
+        raise HTTPException(status_code=404, detail=f"Citizen '{payload.citizen_id}' not found")
+
+    job = await job_queue_manager.enqueue(
+        queue=QueueType.AI_WORKFLOW,
+        payload={
+            "citizen_id": payload.citizen_id,
+            "workflow_type": payload.workflow_type,
+            "requester_id": current_user.sub,
+        },
+        priority=JobPriority.HIGH,
+        citizen_id=payload.citizen_id,
+        tenant_id=current_user.tenant_id,
+    )
+    return {
+        "status": "QUEUED",
+        "job_id": job.id,
+        "citizen_id": payload.citizen_id,
+        "workflow_type": payload.workflow_type,
+        "message": "AI multi-agent workflow queued for background processing.",
+        "status_url": f"/api/v1/jobs/{job.id}",
+    }
 
 
 @router.get("/prevention-agent/tools")

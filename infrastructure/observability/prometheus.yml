@@ -1,0 +1,36 @@
+# ==============================================================================
+# SevaHealth AI - Prometheus Metrics Scraper Configuration
+# Base Image: prom/prometheus:v2.52.0 (Pinned)
+# ==============================================================================
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    monitor: 'sevahealth-monitor'
+    environment: 'production'
+
+scrape_configs:
+  - job_name: 'sevahealth-api'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['sevahealth-api:8000']
+        labels:
+          service: 'api-gateway'
+          tier: 'application'
+
+  - job_name: 'sevahealth-worker'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['sevahealth-worker:8002']
+        labels:
+          service: 'async-worker'
+          tier: 'background-worker'
+
+  - job_name: 'sevahealth-ai'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['sevahealth-ai:8004']
+        labels:
+          service: 'ai-decision-engine'
+          tier: 'intelligence'

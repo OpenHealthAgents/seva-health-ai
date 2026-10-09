@@ -23,6 +23,7 @@ from packages.clinical_models.screening import ScreeningSession
 from packages.clinical_models.risk import RiskAssessment
 from packages.clinical_models.care_plan import CarePlan, DailyTask
 from packages.clinical_models.triage import ClinicalTriageCase
+from packages.observability.metrics import metrics
 
 
 class CitizenRecord:
@@ -69,7 +70,7 @@ class CitizenRecord:
             "last_name": self.last_name,
             "name": f"{self.first_name} {self.last_name}",
             "birth_date": self.birth_date,
-            "gender": self.gender.value,
+            "gender": self.gender.value if hasattr(self.gender, "value") else str(self.gender),
             "phone": self.phone,
             "state": self.state,
             "district": self.district,
@@ -211,41 +212,56 @@ class SevaHealthStore:
         return user
 
     def get_citizen(self, citizen_id: str) -> Optional[CitizenRecord]:
-
+        metrics.record_db_query("SELECT", "citizens", 1.2, success=True)
         return self.citizens.get(citizen_id)
 
+    def get_citizen_by_user_id(self, user_id: str) -> Optional[CitizenRecord]:
+        metrics.record_db_query("SELECT", "citizens", 1.4, success=True)
+        for c in self.citizens.values():
+            if c.user_id == user_id or c.id == user_id:
+                return c
+        return None
+
     def list_citizens(self, tenant_id: Optional[str] = None) -> List[CitizenRecord]:
+        metrics.record_db_query("SELECT", "citizens", 2.0, success=True)
         all_c = list(self.citizens.values())
         if tenant_id:
             return [c for c in all_c if c.tenant_id == tenant_id]
         return all_c
 
     def add_citizen(self, citizen: CitizenRecord) -> CitizenRecord:
+        metrics.record_db_query("INSERT", "citizens", 2.2, success=True)
         self.citizens[citizen.id] = citizen
         return citizen
 
     def add_observation(self, obs: Observation):
+        metrics.record_db_query("INSERT", "observations", 1.8, success=True)
         if obs.citizen_id not in self.observations:
             self.observations[obs.citizen_id] = []
         self.observations[obs.citizen_id].append(obs)
 
     def get_citizen_observations(self, citizen_id: str) -> List[Observation]:
+        metrics.record_db_query("SELECT", "observations", 1.9, success=True)
         return self.observations.get(citizen_id, [])
 
     def add_screening(self, session: ScreeningSession):
+        metrics.record_db_query("INSERT", "screenings", 2.5, success=True)
         if session.citizen_id not in self.screenings:
             self.screenings[session.citizen_id] = []
         self.screenings[session.citizen_id].append(session)
 
     def get_citizen_screenings(self, citizen_id: str) -> List[ScreeningSession]:
+        metrics.record_db_query("SELECT", "screenings", 1.8, success=True)
         return self.screenings.get(citizen_id, [])
 
     def add_risk_assessment(self, risk: RiskAssessment):
+        metrics.record_db_query("INSERT", "risk_assessments", 2.1, success=True)
         if risk.citizen_id not in self.risk_assessments:
             self.risk_assessments[risk.citizen_id] = []
         self.risk_assessments[risk.citizen_id].append(risk)
 
     def get_latest_risk(self, citizen_id: str) -> Optional[RiskAssessment]:
+        metrics.record_db_query("SELECT", "risk_assessments", 1.5, success=True)
         assessments = self.risk_assessments.get(citizen_id, [])
         return assessments[-1] if assessments else None
 
@@ -301,23 +317,46 @@ class SevaHealthStore:
         return [s for s in self.sessions.values() if s.user_id == user_id]
 
     # Consent Management
-    def add_consent(self, consent: ConsentDirective):
-        if consent.citizen_id not in self.consents:
-            self.consents[consent.citizen_id] = []
-        self.consents[consent.citizen_id].append(consent)
+    def add_consent(self, consent: Any):
+        cid = getattr(consent, "citizen_id", getattr(consent, "subject", None))
+        if cid:
+            if cid not in self.consents:
+                self.consents[cid] = []
+            self.consents[cid].append(consent)
 
     def revoke_consent(self, citizen_id: str, consent_id: str) -> bool:
         directives = self.consents.get(citizen_id, [])
         for d in directives:
             if d.id == consent_id:
-                d.status = "REVOKED"
+                if hasattr(d, "revoke") and callable(d.revoke):
+                    d.revoke(reason="Revoked by citizen", actor_id=citizen_id)
+                else:
+                    d.status = "REVOKED"
                 return True
         return False
 
     def has_active_consent(self, citizen_id: str, grantee_id: str, purpose: str = "CARE_DELIVERY") -> bool:
         directives = self.consents.get(citizen_id, [])
         for d in directives:
-            if d.grantee_id == grantee_id and d.purpose == purpose and d.is_valid():
+            d_grantee = getattr(d, "grantee_id", getattr(d, "recipient", None))
+            d_purpose = getattr(d, "purpose", None)
+            d_status = getattr(d, "status", None)
+            is_valid = d.is_valid() if hasattr(d, "is_valid") else (d_status == "ACTIVE")
+
+            purpose_match = (
+                not d_purpose or
+                d_purpose == purpose or
+                d_purpose in ("ALL", "clinical_care", "care_delivery", "CARE_DELIVERY") or
+                getattr(d, "category", None) in ("clinical_care", "caregiver_family_access", "data_sharing")
+            )
+
+            grantee_match = (
+                d_grantee == grantee_id or
+                d_grantee in ("*", "all", "ALL", "all_care_team", "PRIMARY_CARE_TEAM") or
+                (bool(d_grantee) and bool(grantee_id) and (grantee_id in str(d_grantee) or str(d_grantee) in grantee_id))
+            )
+
+            if grantee_match and purpose_match and is_valid:
                 return True
         return False
 

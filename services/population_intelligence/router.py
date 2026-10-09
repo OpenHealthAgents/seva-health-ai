@@ -6,7 +6,7 @@ k-anonymity (k >= 10) cell suppression and salted pseudonymized data export.
 """
 
 from typing import Optional
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, status
 
 from packages.auth.jwt import get_current_user_token, TokenPayload, require_roles
 from packages.types.enums import UserRole
@@ -178,6 +178,38 @@ async def get_export(
     5-year age bands, and categorized clinical indicators. Zero individual PII exposed.
     """
     return get_deidentified_export(limit=limit)
+
+
+@router.post(
+    "/export-async",
+    status_code=status.HTTP_202_ACCEPTED,
+    summary="Asynchronously Generate & Export Population Microdata",
+)
+async def export_population_microdata_async(
+    limit: int = Query(500, ge=1, le=50000, description="Cohort size to export"),
+    district: Optional[str] = Query("All", description="District filter"),
+    current_user: TokenPayload = Depends(
+        require_roles([UserRole.PUBLIC_HEALTH_ADMIN, UserRole.SYSTEM_ADMIN])
+    ),
+):
+    """Enqueues heavy district-level aggregation and k-anonymity pseudonymization to background queue."""
+    from packages.queue.manager import job_queue_manager
+    from packages.queue.models import QueueType, JobPriority
+
+    job = await job_queue_manager.enqueue(
+        queue=QueueType.POPULATION_ANALYTICS,
+        payload={"cohort_size": limit, "district": district},
+        priority=JobPriority.NORMAL,
+        tenant_id=current_user.tenant_id,
+    )
+    return {
+        "status": "QUEUED",
+        "job_id": job.id,
+        "district": district,
+        "sample_size": limit,
+        "message": "Population export processing in background.",
+        "status_url": f"/api/v1/jobs/{job.id}",
+    }
 
 
 # ==============================================================================

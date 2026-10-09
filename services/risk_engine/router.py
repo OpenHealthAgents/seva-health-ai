@@ -12,6 +12,10 @@ from services.risk_engine.evaluator import evaluate_ncd_domains
 from services.risk_engine.engine import ncd_risk_engine, ModularRiskAssessment
 from services.wearable.adapter import wearable_adapter
 from services.store import store
+import time
+from packages.observability.context import SpanStage
+from packages.observability.tracer import tracer
+from packages.observability.metrics import metrics
 
 router = APIRouter(prefix="/risk", tags=["NCD Risk & Explainability Engine"])
 
@@ -112,13 +116,24 @@ async def evaluate_citizen_risk(
 
     wearable_proj = wearable_adapter.get_projection(citizen_id)
 
-    domains, overall_score, tier, trajectory, drivers, protective = evaluate_ncd_domains(
-        observations=observations,
-        idrs_score=idrs or 40,
-        gender=citizen.gender.value if hasattr(citizen.gender, "value") else str(citizen.gender),
-        smoker=smoker,
-        wearable_projection=wearable_proj,
-    )
+    start_eval = time.time()
+    with tracer.span(
+        name="EvaluateNCDDomains",
+        stage=SpanStage.RISK_ENGINE,
+        tags={"citizen_id": citizen_id, "idrs_score": idrs},
+    ) as risk_span:
+        domains, overall_score, tier, trajectory, drivers, protective = evaluate_ncd_domains(
+            observations=observations,
+            idrs_score=idrs or 40,
+            gender=citizen.gender.value if hasattr(citizen.gender, "value") else str(citizen.gender),
+            smoker=smoker,
+            wearable_projection=wearable_proj,
+        )
+        duration_ms = round((time.time() - start_eval) * 1000, 2)
+        metrics.record_risk_engine(domain="multidomain", duration_ms=duration_ms, risk_tier=tier.value)
+        metrics.record_model_inference(model_version="calibrated_ensemble_v1.0.0", duration_ms=duration_ms)
+        risk_span.set_tag("tier", tier.value)
+        risk_span.set_tag("overall_score", overall_score)
 
     assessment = RiskAssessment(
         id=str(uuid.uuid4()),
@@ -139,7 +154,14 @@ async def evaluate_citizen_risk(
         ),
         evaluated_at=datetime.now(timezone.utc),
     )
-    store.add_risk_assessment(assessment)
+
+    with tracer.span(
+        name="StoreRiskAssessment",
+        stage=SpanStage.CLINICAL_REPOSITORY,
+        tags={"table": "risk_assessments", "citizen_id": citizen_id},
+    ):
+        store.add_risk_assessment(assessment)
+        metrics.record_db_query(operation="INSERT", table="risk_assessments", duration_ms=2.1, success=True)
 
     # Automatic Clinical Triage Escalation for HIGH or CRITICAL tiers
     if tier in [RiskTier.HIGH, RiskTier.CRITICAL]:

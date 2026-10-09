@@ -48,18 +48,36 @@
     </div>
   </div>
 
+  <!-- 1. WHO NEEDS ATTENTION? (Clinical Priority Triage Queue) -->
+  <section id="who-needs-attention" class="bg-slate-100 border-b border-slate-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
+      <div class="flex items-center justify-between mb-2">
+        <h3 class="text-xs font-bold uppercase tracking-wider text-slate-800 flex items-center space-x-2">
+          <span class="w-2.5 h-2.5 rounded-full bg-red-600 animate-pulse"></span>
+          <span class="text-blue-700 font-extrabold text-sm">1. WHO NEEDS ATTENTION?</span>
+          <span class="text-slate-400 font-normal">|</span>
+          <span class="text-xs text-slate-600">Priority Clinical Triage Queue (Karnataka NCD Surveillance)</span>
+        </h3>
+        <span class="text-[11px] text-slate-500 font-medium hidden sm:inline">Select patient to view longitudinal trajectory & AI analysis</span>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3" id="triageQueueGrid">
+        <!-- Rendered dynamically by script -->
+      </div>
+    </div>
+  </section>
+
   <!-- Patient Context Banner -->
-  <div class="bg-white border-b border-slate-200 shadow-sm">
+  <div class="bg-white border-b border-slate-200 shadow-sm" id="patientContextBanner">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex flex-wrap items-center justify-between gap-4">
       <div class="flex items-center space-x-4">
-        <div class="h-12 w-12 rounded-full bg-blue-100 text-blue-700 font-bold text-xl flex items-center justify-center">RP</div>
+        <div id="patientInitials" class="h-12 w-12 rounded-full bg-blue-100 text-blue-700 font-bold text-xl flex items-center justify-center">RP</div>
         <div>
           <div class="flex items-center space-x-2">
-            <h2 class="text-xl font-bold text-slate-900">Ramesh Patel</h2>
-            <span class="px-2 py-0.5 rounded text-xs font-semibold bg-red-100 text-red-800 border border-red-200">HIGH RISK (68%)</span>
-            <span class="px-2 py-0.5 rounded text-xs font-semibold bg-amber-100 text-amber-800 border border-amber-200">TRAJECTORY: WORSENING (+27.9%)</span>
+            <h2 id="patientName" class="text-xl font-bold text-slate-900">Ramesh Patel</h2>
+            <span id="patientRiskBadge" class="px-2 py-0.5 rounded text-xs font-semibold bg-red-100 text-red-800 border border-red-200">HIGH RISK (68%)</span>
+            <span id="patientTrajectoryBadge" class="px-2 py-0.5 rounded text-xs font-semibold bg-amber-100 text-amber-800 border border-amber-200">TRAJECTORY: WORSENING (+27.9%)</span>
           </div>
-          <div class="text-xs text-slate-500 flex items-center space-x-4 mt-0.5">
+          <div id="patientMeta" class="text-xs text-slate-500 flex items-center space-x-4 mt-0.5">
             <span>48 Years / Male</span>
             <span>ABHA: 91-4829-1029-4820</span>
             <span>Devanahalli, Bengaluru Rural</span>
@@ -86,33 +104,136 @@
         <span class="text-xs text-slate-500">11 Data Dimensions</span>
       </div>
 
-      <!-- 1 & 2: Current Risks & Risk Trajectory -->
-      <div class="bg-white rounded-lg border border-slate-200 p-4 shadow-sm">
-        <div class="flex items-center justify-between mb-2">
-          <h4 class="text-xs font-bold uppercase text-slate-600 tracking-wider">Current Risks & Trajectory</h4>
-          <span class="px-2 py-0.5 text-xs font-semibold rounded bg-red-50 text-red-700 border border-red-200">Tier: HIGH</span>
+      <!-- 2. WHAT CHANGED? (Longitudinal Delta: 6 Months Baseline vs Today) -->
+      <div id="what-changed" class="bg-white rounded-lg border border-slate-200 p-4 shadow-sm">
+        <div class="flex items-center justify-between mb-3 border-b border-slate-100 pb-2">
+          <h4 class="text-xs font-bold uppercase text-slate-800 tracking-wider flex items-center space-x-1.5">
+            <span class="w-2 h-2 rounded-full bg-blue-600"></span>
+            <span class="text-blue-700 font-extrabold text-sm">2. WHAT CHANGED?</span>
+          </h4>
+          <span id="txtTrajectoryBadge" class="px-2 py-0.5 text-xs font-semibold rounded bg-amber-100 text-amber-800 border border-amber-200">TRAJECTORY: WORSENING (+27.9%)</span>
         </div>
-        <div class="grid grid-cols-2 gap-2 text-xs mb-3">
-          <div class="bg-slate-50 p-2 rounded border border-slate-100">
-            <span class="text-slate-500 block">Diabetes Risk:</span>
-            <span class="font-bold text-red-600 text-sm">74% (Prediabetes)</span>
-          </div>
-          <div class="bg-slate-50 p-2 rounded border border-slate-100">
-            <span class="text-slate-500 block">Hypertension Risk:</span>
-            <span class="font-bold text-amber-600 text-sm">62% (Pre-HTN)</span>
-          </div>
-          <div class="bg-slate-50 p-2 rounded border border-slate-100">
-            <span class="text-slate-500 block">Cardiovascular Risk:</span>
-            <span class="font-bold text-slate-800 text-sm">45% (Moderate)</span>
-          </div>
-          <div class="bg-slate-50 p-2 rounded border border-slate-100">
-            <span class="text-slate-500 block">Metabolic Syndrome:</span>
-            <span class="font-bold text-red-600 text-sm">70% (Elevated)</span>
-          </div>
+        <p class="text-xs text-slate-500 mb-3">Comparing 6-month historical baseline against today's screening & wearable readings:</p>
+        <div class="overflow-x-auto mb-3">
+          <table class="w-full text-xs text-left border-collapse">
+            <thead>
+              <tr class="bg-slate-50 text-slate-500 text-[10px] uppercase font-semibold">
+                <th class="p-1.5 border-b">Biomarker / Measure</th>
+                <th class="p-1.5 border-b">6M Baseline</th>
+                <th class="p-1.5 border-b">Current</th>
+                <th class="p-1.5 border-b">Shift Delta</th>
+              </tr>
+            </thead>
+            <tbody id="deltaTableBody" class="divide-y divide-slate-100">
+              <tr>
+                <td class="p-1.5 font-medium">Blood Pressure (SBP/DBP)</td>
+                <td class="p-1.5 text-slate-500">126/80 mmHg</td>
+                <td class="p-1.5 font-bold text-red-700">138/88 mmHg</td>
+                <td class="p-1.5"><span class="px-1.5 py-0.5 rounded bg-red-50 text-red-700 font-bold text-[10px]">+12 mmHg 🔺</span></td>
+              </tr>
+              <tr>
+                <td class="p-1.5 font-medium">HbA1c (Glycated Hb)</td>
+                <td class="p-1.5 text-slate-500">5.7% (Normal)</td>
+                <td class="p-1.5 font-bold text-red-700">6.2% (Prediabetes)</td>
+                <td class="p-1.5"><span class="px-1.5 py-0.5 rounded bg-red-50 text-red-700 font-bold text-[10px]">+0.5% 🔺</span></td>
+              </tr>
+              <tr>
+                <td class="p-1.5 font-medium">Fasting Blood Glucose</td>
+                <td class="p-1.5 text-slate-500">98 mg/dL</td>
+                <td class="p-1.5 font-bold text-red-700">118 mg/dL</td>
+                <td class="p-1.5"><span class="px-1.5 py-0.5 rounded bg-red-50 text-red-700 font-bold text-[10px]">+20 mg/dL 🔺</span></td>
+              </tr>
+              <tr>
+                <td class="p-1.5 font-medium">7-Day Daily Steps</td>
+                <td class="p-1.5 text-slate-500">8,200 steps</td>
+                <td class="p-1.5 font-bold text-amber-700">5,200 steps</td>
+                <td class="p-1.5"><span class="px-1.5 py-0.5 rounded bg-amber-50 text-amber-700 font-bold text-[10px]">-36.6% 🔻</span></td>
+              </tr>
+              <tr>
+                <td class="p-1.5 font-medium">Resting Heart Rate</td>
+                <td class="p-1.5 text-slate-500">68 bpm</td>
+                <td class="p-1.5 font-bold text-slate-800">76 bpm</td>
+                <td class="p-1.5"><span class="px-1.5 py-0.5 rounded bg-amber-50 text-amber-700 font-bold text-[10px]">+8 bpm 🔺</span></td>
+              </tr>
+              <tr>
+                <td class="p-1.5 font-medium">HRV rMSSD</td>
+                <td class="p-1.5 text-slate-500">48 ms</td>
+                <td class="p-1.5 font-bold text-red-700">36 ms</td>
+                <td class="p-1.5"><span class="px-1.5 py-0.5 rounded bg-red-50 text-red-700 font-bold text-[10px]">-25% (Strain) 🔻</span></td>
+              </tr>
+            </tbody>
+          </table>
         </div>
-        <div class="border-t border-slate-100 pt-2 text-xs text-slate-600 flex items-center justify-between">
-          <span>Trajectory Comparison:</span>
-          <span class="font-medium text-amber-700">Current 0.68 vs Baseline 0.44 (+27.9%)</span>
+        <div id="deltaNarrative" class="p-2.5 bg-slate-50 rounded border border-slate-100 text-xs text-slate-700 leading-relaxed">
+          <strong>Summary of Change:</strong> Systolic blood pressure increased by +12 mmHg into stage 1 pre-hypertension, glycemic markers crossed into prediabetes range (HbA1c 6.2%), and daily walking declined significantly (-3,000 steps/day).
+        </div>
+      </div>
+
+      <!-- 3. WHY IS RISK CHANGING? (Explainable AI Feature Attribution Waterfall) -->
+      <div id="why-risk-changing" class="bg-white rounded-lg border border-slate-200 p-4 shadow-sm">
+        <div class="flex items-center justify-between mb-3 border-b border-slate-100 pb-2">
+          <h4 class="text-xs font-bold uppercase text-slate-800 tracking-wider flex items-center space-x-1.5">
+            <span class="w-2 h-2 rounded-full bg-purple-600"></span>
+            <span class="text-purple-700 font-extrabold text-sm">3. WHY IS RISK CHANGING?</span>
+          </h4>
+          <span class="text-[10px] mono text-slate-400">SHAP / ICMR-INDIAB</span>
+        </div>
+        <p class="text-xs text-slate-500 mb-3">Model attribution weights quantifying physiological & lifestyle drivers:</p>
+        <div class="space-y-2.5 text-xs" id="attributionBarsContainer">
+          <div>
+            <div class="flex justify-between text-slate-700 mb-1">
+              <span>🩸 <strong>Glycemic Load:</strong> Impaired fasting glucose & HbA1c 6.2%</span>
+              <span class="font-bold text-red-600">+0.14</span>
+            </div>
+            <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+              <div class="bg-red-500 h-2 rounded-full" style="width: 70%"></div>
+            </div>
+          </div>
+          <div>
+            <div class="flex justify-between text-slate-700 mb-1">
+              <span>💓 <strong>Vascular Resistance:</strong> SBP 138 / DBP 88 mmHg (Pre-HTN)</span>
+              <span class="font-bold text-red-600">+0.11</span>
+            </div>
+            <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+              <div class="bg-red-500 h-2 rounded-full" style="width: 55%"></div>
+            </div>
+          </div>
+          <div>
+            <div class="flex justify-between text-slate-700 mb-1">
+              <span>⚖️ <strong>Visceral Adiposity:</strong> Waist 96 cm (> 90cm Asian cutoff)</span>
+              <span class="font-bold text-amber-600">+0.09</span>
+            </div>
+            <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+              <div class="bg-amber-500 h-2 rounded-full" style="width: 45%"></div>
+            </div>
+          </div>
+          <div>
+            <div class="flex justify-between text-slate-700 mb-1">
+              <span>🚶 <strong>Physical Inactivity:</strong> &lt; 6,000 steps/day (blunted uptake)</span>
+              <span class="font-bold text-amber-600">+0.07</span>
+            </div>
+            <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+              <div class="bg-amber-500 h-2 rounded-full" style="width: 35%"></div>
+            </div>
+          </div>
+          <div>
+            <div class="flex justify-between text-slate-700 mb-1">
+              <span>🍚 <strong>Diet Pattern:</strong> High polished white rice & sodium intake</span>
+              <span class="font-bold text-amber-600">+0.06</span>
+            </div>
+            <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+              <div class="bg-amber-500 h-2 rounded-full" style="width: 30%"></div>
+            </div>
+          </div>
+          <div>
+            <div class="flex justify-between text-slate-700 mb-1">
+              <span>🛡️ <strong>Protective Factors:</strong> Tobacco/alcohol abstinence & meds</span>
+              <span class="font-bold text-emerald-600">-0.11</span>
+            </div>
+            <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+              <div class="bg-emerald-500 h-2 rounded-full" style="width: 40%"></div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -301,71 +422,106 @@
             </p>
           </div>
 
-          <!-- 4. Missing Information -->
-          <div class="border border-slate-200 rounded-md p-3 bg-slate-50/50">
-            <div class="flex items-center justify-between mb-1">
-              <h5 class="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center space-x-1.5">
-                <span class="w-2 h-2 rounded-full bg-amber-600"></span>
-                <span>4. Missing Information & Diagnostic Gaps</span>
+          <!-- 4. WHAT INFORMATION IS MISSING? (Diagnostic Gaps & Checklist) -->
+          <div id="what-information-missing" class="border border-amber-300 rounded-md p-3.5 bg-amber-50/40">
+            <div class="flex items-center justify-between mb-2">
+              <h5 class="text-xs font-bold text-amber-900 uppercase tracking-wider flex items-center space-x-1.5">
+                <span class="w-2 h-2 rounded-full bg-amber-500"></span>
+                <span class="text-amber-900 font-extrabold">4. WHAT INFORMATION IS MISSING?</span>
               </h5>
-              <span class="badge-ai text-[10px] px-1.5 py-0.5 rounded font-mono">AI-GENERATED</span>
+              <span class="badge-ai text-[10px] px-1.5 py-0.5 rounded font-mono">DIAGNOSTIC GAPS</span>
             </div>
-            <ul id="listMissingInfo" class="text-xs text-slate-700 list-disc list-inside space-y-1">
-              <li>Renal filtration panel (Serum Creatinine and calculated eGFR) pending</li>
-              <li>Spot urine microalbumin-to-creatinine ratio (uACR) for diabetic kidney disease screening</li>
-              <li>Standardized in-clinic repeat resting blood pressure calibration</li>
-            </ul>
+            <p class="text-[11px] text-amber-800 mb-2.5">
+              The AI has flagged the following high-priority diagnostic gaps needed to complete clinical risk evaluation:
+            </p>
+            <div class="space-y-2 text-xs" id="missingChecklistContainer">
+              <label class="flex items-start space-x-2 p-1.5 rounded bg-white border border-amber-200 cursor-pointer">
+                <input type="checkbox" checked class="mt-0.5 rounded text-amber-600 focus:ring-amber-500">
+                <span class="text-slate-800">
+                  <strong>Spot Urine Microalbumin-to-Creatinine Ratio (uACR):</strong> Missing. Screen for diabetic nephropathy before glycemic load progresses.
+                </span>
+              </label>
+              <label class="flex items-start space-x-2 p-1.5 rounded bg-white border border-amber-200 cursor-pointer">
+                <input type="checkbox" checked class="mt-0.5 rounded text-amber-600 focus:ring-amber-500">
+                <span class="text-slate-800">
+                  <strong>Serum Creatinine & Calculated eGFR:</strong> Missing. Essential renal safety baseline prior to titrating Metformin dosage.
+                </span>
+              </label>
+              <label class="flex items-start space-x-2 p-1.5 rounded bg-white border border-amber-200 cursor-pointer">
+                <input type="checkbox" checked class="mt-0.5 rounded text-amber-600 focus:ring-amber-500">
+                <span class="text-slate-800">
+                  <strong>Repeat Standardized In-Clinic Resting Blood Pressure:</strong> Pending. Protocol mandates 3-reading average to confirm prehypertension vs white-coat response.
+                </span>
+              </label>
+              <label class="flex items-start space-x-2 p-1.5 rounded bg-white border border-amber-200 cursor-pointer">
+                <input type="checkbox" class="mt-0.5 rounded text-amber-600 focus:ring-amber-500">
+                <span class="text-slate-800">
+                  <strong>Fasting Lipid Panel (LDL/HDL/Triglycerides):</strong> Outdated (&gt; 11 months old). Required for 10-year ASCVD risk stratification.
+                </span>
+              </label>
+              <label class="flex items-start space-x-2 p-1.5 rounded bg-white border border-amber-200 cursor-pointer">
+                <input type="checkbox" class="mt-0.5 rounded text-amber-600 focus:ring-amber-500">
+                <span class="text-slate-800">
+                  <strong>Continuous 7-Day Wearable Sync:</strong> Incomplete. Last connected 3 days ago; nocturnal dipping profile pending.
+                </span>
+              </label>
+            </div>
+            <div class="mt-3 flex flex-wrap gap-2 pt-2 border-t border-amber-200/80">
+              <button onclick="orderSelectedTests()" class="px-3 py-1.5 bg-amber-700 hover:bg-amber-800 text-white rounded text-xs font-bold flex items-center space-x-1.5 shadow-xs">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
+                <span>Order Selected Investigations</span>
+              </button>
+              <button onclick="requestAshaCalibration()" class="px-3 py-1.5 bg-white border border-amber-300 text-amber-900 rounded text-xs font-semibold hover:bg-amber-50">
+                <span>Request In-Clinic BP Calibration</span>
+              </button>
+            </div>
           </div>
 
-          <!-- 5. Possible Contributing Factors -->
-          <div class="border border-slate-200 rounded-md p-3 bg-slate-50/50">
-            <div class="flex items-center justify-between mb-1">
-              <h5 class="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center space-x-1.5">
-                <span class="w-2 h-2 rounded-full bg-purple-600"></span>
-                <span>5. Possible Contributing Factors</span>
-              </h5>
-              <span class="badge-ai text-[10px] px-1.5 py-0.5 rounded font-mono">AI-GENERATED</span>
-            </div>
-            <ul id="listContributingFactors" class="text-xs text-slate-700 list-disc list-inside space-y-1">
-              <li>Elevated peripheral vascular resistance associated with pre-hypertensive load.</li>
-              <li>Peripheral insulin resistance associated with central abdominal adiposity (waist 96 cm).</li>
-              <li>Sedentary movement pattern (&lt; 6,000 steps/day) contributing to blunted non-insulin dependent glucose uptake.</li>
-              <li>High-glycemic-index dietary staple (white rice) with insufficient soluble fiber.</li>
-            </ul>
-          </div>
-
-          <!-- 6. Suggested Follow-Up -->
-          <div class="border border-slate-200 rounded-md p-3 bg-slate-50/50">
-            <div class="flex items-center justify-between mb-1">
-              <h5 class="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center space-x-1.5">
-                <span class="w-2 h-2 rounded-full bg-blue-600"></span>
-                <span>6. Suggested Follow-Up Actions</span>
-              </h5>
-              <span class="badge-ai text-[10px] px-1.5 py-0.5 rounded font-mono">AI-GENERATED</span>
-            </div>
-            <ul id="listSuggestedFollowUp" class="text-xs text-slate-700 list-disc list-inside space-y-1">
-              <li>Schedule in-person PHC clinical consultation within 14 days for comprehensive evaluation.</li>
-              <li>Initiate 7-day home blood pressure monitoring (AM/PM log).</li>
-              <li>Repeat HbA1c and fasting blood sugar in 90 days.</li>
-              <li>Reinforce lifestyle nutrition guidance: substitute 50% white rice with foxtail/ragi millet; sodium &lt; 2g/day.</li>
-            </ul>
-          </div>
-
-          <!-- 7. Questions for Clinician Consideration -->
-          <div class="border border-blue-200 rounded-md p-3 bg-blue-50/40">
-            <div class="flex items-center justify-between mb-1">
+          <!-- 5. WHAT ACTION SHOULD I CONSIDER? (Clinical Decision Support & Pathways) -->
+          <div id="what-action-to-consider" class="border border-blue-200 rounded-md p-3.5 bg-blue-50/40">
+            <div class="flex items-center justify-between mb-2">
               <h5 class="text-xs font-bold text-blue-900 uppercase tracking-wider flex items-center space-x-1.5">
                 <span class="w-2 h-2 rounded-full bg-blue-600"></span>
-                <span>7. Questions for Clinician Consideration</span>
+                <span class="text-blue-900 font-extrabold">5. WHAT ACTION SHOULD I CONSIDER?</span>
               </h5>
-              <span class="badge-ai text-[10px] px-1.5 py-0.5 rounded font-mono">AI-GENERATED</span>
+              <span class="badge-ai text-[10px] px-1.5 py-0.5 rounded font-mono">RECOMMENDED PATHWAYS</span>
             </div>
-            <ul id="listClinicianQuestions" class="text-xs text-blue-950 list-disc list-inside space-y-1">
-              <li>Are there symptoms of nocturnal dyspnea, snoring, or daytime somnolence suggesting obstructive sleep apnea?</li>
-              <li>Does the patient report GI adverse effects on Metformin 500mg that might be causing skipped doses?</li>
-              <li>Are there household or cultural barriers preventing the family from adopting whole millets in place of white rice?</li>
-              <li>Would the patient benefit from referral to a district hospital Diabetologist or specialist NCD clinic?</li>
-            </ul>
+            <p class="text-[11px] text-blue-900 mb-3">
+              Evidence-based clinical decision options synthesized for Dr. Anand Kulkarni:
+            </p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs mb-3" id="actionPathwaysGrid">
+              <div class="p-2.5 bg-white rounded border-2 border-emerald-500 shadow-xs relative">
+                <span class="absolute top-1.5 right-1.5 px-1.5 py-0.5 bg-emerald-100 text-emerald-800 rounded text-[9px] font-bold">RECOMMENDED</span>
+                <div class="font-bold text-emerald-900 text-xs mb-1">Pathway A: Community Lifestyle Intervention</div>
+                <p class="text-[11px] text-slate-600 mb-2">Approve 30-day millet nutrition plan (replace 50% white rice) & 7,500 daily steps target monitored by ASHA Sunita.</p>
+                <button onclick="openCarePlanModal()" class="w-full py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded text-[11px] font-bold">Prescribe Care Plan</button>
+              </div>
+              <div class="p-2.5 bg-white rounded border border-slate-200 shadow-xs">
+                <div class="font-bold text-slate-800 text-xs mb-1">Pathway B: Pharmacotherapy Titration</div>
+                <p class="text-[11px] text-slate-600 mb-2">Maintain Metformin 500mg daily; re-evaluate dose titration to 850mg if 90-day repeat HbA1c remains >6.0%.</p>
+                <button onclick="openEditModal()" class="w-full py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded text-[11px] font-semibold border border-slate-300">Modify Pharmacotherapy</button>
+              </div>
+              <div class="p-2.5 bg-white rounded border border-slate-200 shadow-xs">
+                <div class="font-bold text-slate-800 text-xs mb-1">Pathway C: Specialty Referral</div>
+                <p class="text-[11px] text-slate-600 mb-2">Issue secondary outpatient referral to District Hospital Diabetology & NCD clinic for metabolic risk stratification.</p>
+                <button onclick="openReferralModal()" class="w-full py-1 bg-purple-50 hover:bg-purple-100 text-purple-700 rounded text-[11px] font-semibold border border-purple-200">Issue Specialist Referral</button>
+              </div>
+              <div class="p-2.5 bg-white rounded border border-slate-200 shadow-xs">
+                <div class="font-bold text-slate-800 text-xs mb-1">Pathway D: Urgent Clinical Escalation</div>
+                <p class="text-[11px] text-slate-600 mb-2">If symptoms of orthopnea, chest tightness, or dizzy spells occur, escalate immediately to emergency queue.</p>
+                <button onclick="openEscalateModal()" class="w-full py-1 bg-rose-50 hover:bg-rose-100 text-rose-700 rounded text-[11px] font-semibold border border-rose-200">Escalate Urgency</button>
+              </div>
+            </div>
+            
+            <!-- Questions for Clinician Consideration -->
+            <div class="bg-blue-100/60 rounded p-2.5 border border-blue-200 mb-1">
+              <div class="text-[11px] font-bold text-blue-950 mb-1">Questions for Clinician Review:</div>
+              <ul class="text-[11px] text-blue-900 list-disc list-inside space-y-0.5">
+                <li>Does the patient report gastrointestinal side-effects on Metformin causing missed doses?</li>
+                <li>Are there household or affordability barriers preventing adoption of ragi / foxtail millets?</li>
+                <li>Would an ASHA-assisted home BP log improve adherence before the 14-day clinic review?</li>
+              </ul>
+            </div>
           </div>
 
         </div>
@@ -675,6 +831,232 @@
     function regenerateCopilot() {
       alert('AI Copilot refreshed with latest biometric telemetry!');
     }
+
+    // Patient Triage Queue Data & Switching
+    const PATIENTS = [
+      {
+        id: 'p1',
+        name: 'Ramesh Patel',
+        initials: 'RP',
+        age: 48,
+        gender: 'Male',
+        abha: '91-4829-1029-4820',
+        location: 'Devanahalli, Bengaluru Rural',
+        ward: 'PHC Ward 12',
+        tier: 'HIGH',
+        riskScore: '68%',
+        trajectory: 'WORSENING (+27.9%)',
+        urgency: 'PRIORITY',
+        urgencyBadge: 'bg-amber-100 text-amber-800 border-amber-300',
+        condition: 'Prediabetes & Mild HTN',
+        deltaSummary: 'Primary clinical deterioration: Blood pressure elevated into Pre-HTN (138/88 mmHg, +12 mmHg), HbA1c climbed from 5.7% to 6.2% (Prediabetes), and daily walking declined by 3,000 steps/day.',
+        deltas: [
+          { metric: 'Blood Pressure (SBP/DBP)', baseline: '126/80 mmHg', current: '138/88 mmHg', delta: '+12 mmHg 🔺', isBad: true },
+          { metric: 'HbA1c (Glycated Hb)', baseline: '5.7% (Normal)', current: '6.2% (Prediabetes)', delta: '+0.5% 🔺', isBad: true },
+          { metric: 'Fasting Blood Glucose', baseline: '98 mg/dL', current: '118 mg/dL', delta: '+20 mg/dL 🔺', isBad: true },
+          { metric: '7-Day Daily Steps', baseline: '8,200 steps', current: '5,200 steps', delta: '-36.6% 🔻', isBad: true },
+          { metric: 'Resting Heart Rate', baseline: '68 bpm', current: '76 bpm', delta: '+8 bpm 🔺', isBad: true },
+          { metric: 'HRV rMSSD', baseline: '48 ms', current: '36 ms', delta: '-25% (Strain) 🔻', isBad: true }
+        ],
+        drivers: [
+          { name: 'Glycemic Load (HbA1c 6.2%, FBG 118)', weight: '+0.14', color: 'bg-red-500', width: '70%' },
+          { name: 'Vascular Resistance (138/88 mmHg)', weight: '+0.11', color: 'bg-red-500', width: '55%' },
+          { name: 'Visceral Adiposity (Waist 96cm, BMI 27.2)', weight: '+0.09', color: 'bg-amber-500', width: '45%' },
+          { name: 'Physical Inactivity (<6,000 steps)', weight: '+0.07', color: 'bg-amber-500', width: '35%' },
+          { name: 'Dietary Carbs & High Sodium', weight: '+0.06', color: 'bg-amber-500', width: '30%' },
+          { name: 'Protective Factors (Abstinence, Rx)', weight: '-0.11', color: 'bg-emerald-500', width: '40%' }
+        ]
+      },
+      {
+        id: 'p2',
+        name: 'Suresh Kumar',
+        initials: 'SK',
+        age: 62,
+        gender: 'Male',
+        abha: '91-3829-4912-3021',
+        location: 'Kuvempunagar, Mysuru',
+        ward: 'PHC Ward 4',
+        tier: 'CRITICAL',
+        riskScore: '84%',
+        trajectory: 'WORSENING (+34.5%)',
+        urgency: 'EMERGENT',
+        urgencyBadge: 'bg-red-100 text-red-800 border-red-300',
+        condition: 'Multi-Morbid (CVD + CKD Stage 3)',
+        deltaSummary: 'Severe vascular and renal progression: Blood pressure spiked to Stage 2 HTN (162/98 mmHg), eGFR declined from 58 to 44 mL/min/1.73m², elevated microalbuminuria.',
+        deltas: [
+          { metric: 'Blood Pressure (SBP/DBP)', baseline: '142/90 mmHg', current: '162/98 mmHg', delta: '+20 mmHg 🔺', isBad: true },
+          { metric: 'HbA1c (Glycated Hb)', baseline: '7.4%', current: '8.1%', delta: '+0.7% 🔺', isBad: true },
+          { metric: 'eGFR Renal Clearance', baseline: '58 mL/min', current: '44 mL/min', delta: '-14 mL/min 🔻', isBad: true },
+          { metric: 'Serum Creatinine', baseline: '1.3 mg/dL', current: '1.7 mg/dL', delta: '+0.4 mg/dL 🔺', isBad: true },
+          { metric: '7-Day Daily Steps', baseline: '4,500 steps', current: '2,100 steps', delta: '-53.3% 🔻', isBad: true },
+          { metric: 'Resting Heart Rate', baseline: '74 bpm', current: '88 bpm', delta: '+14 bpm 🔺', isBad: true }
+        ],
+        drivers: [
+          { name: 'Renal Clearance Decline (eGFR 44)', weight: '+0.22', color: 'bg-red-600', width: '85%' },
+          { name: 'Severe Vascular Strain (162/98 mmHg)', weight: '+0.19', color: 'bg-red-500', width: '75%' },
+          { name: 'Uncontrolled Glycemia (HbA1c 8.1%)', weight: '+0.15', color: 'bg-red-500', width: '60%' },
+          { name: 'Mobility Impairment (<2,500 steps)', weight: '+0.09', color: 'bg-amber-500', width: '40%' },
+          { name: 'Protective Factors (Partial Rx Adherence)', weight: '-0.05', color: 'bg-emerald-500', width: '20%' }
+        ]
+      },
+      {
+        id: 'p3',
+        name: 'Priya Sharma',
+        initials: 'PS',
+        age: 34,
+        gender: 'Female',
+        abha: '91-5820-1928-8472',
+        location: 'Mandya Town',
+        ward: 'Ward 8 Sector B',
+        tier: 'MODERATE',
+        riskScore: '42%',
+        trajectory: 'IMPROVING (-18.2%)',
+        urgency: 'ROUTINE',
+        urgencyBadge: 'bg-emerald-100 text-emerald-800 border-emerald-300',
+        condition: 'Post-GDM Metabolic Followup',
+        deltaSummary: 'Positive lifestyle trajectory: Fasting glucose normalized from 114 to 96 mg/dL, daily steps surged to 8,900, post-pregnancy visceral adiposity resolving.',
+        deltas: [
+          { metric: 'Blood Pressure (SBP/DBP)', baseline: '124/82 mmHg', current: '116/76 mmHg', delta: '-8 mmHg 📉', isBad: false },
+          { metric: 'HbA1c (Glycated Hb)', baseline: '6.1%', current: '5.6% (Normal)', delta: '-0.5% 📉', isBad: false },
+          { metric: 'Fasting Blood Glucose', baseline: '114 mg/dL', current: '96 mg/dL', delta: '-18 mg/dL 📉', isBad: false },
+          { metric: '7-Day Daily Steps', baseline: '5,800 steps', current: '8,900 steps', delta: '+53.4% 📈', isBad: false },
+          { metric: 'Resting Heart Rate', baseline: '72 bpm', current: '66 bpm', delta: '-6 bpm 📉', isBad: false },
+          { metric: 'HRV rMSSD', baseline: '40 ms', current: '54 ms', delta: '+14 ms 📈', isBad: false }
+        ],
+        drivers: [
+          { name: 'Habit Formation (8,900 steps/day)', weight: '-0.18', color: 'bg-emerald-500', width: '70%' },
+          { name: 'Glycemic Normalization (FBG 96)', weight: '-0.14', color: 'bg-emerald-500', width: '55%' },
+          { name: 'Vascular Relaxation (116/76 mmHg)', weight: '-0.09', color: 'bg-emerald-500', width: '40%' },
+          { name: 'Residual Postpartum Insulin Resistance', weight: '+0.08', color: 'bg-amber-500', width: '35%' }
+        ]
+      },
+      {
+        id: 'p4',
+        name: 'Sunita Devi',
+        initials: 'SD',
+        age: 52,
+        gender: 'Female',
+        abha: '91-1029-4820-5910',
+        location: 'Chamarajanagar Rural',
+        ward: 'HWC Outreach Center 3',
+        tier: 'HIGH',
+        riskScore: '65%',
+        trajectory: 'OVERDUE (+12.4%)',
+        urgency: 'OUTREACH',
+        urgencyBadge: 'bg-purple-100 text-purple-800 border-purple-300',
+        condition: 'Hypertension + Missed 30D Followup',
+        deltaSummary: 'Loss-to-follow-up risk: Patient missed 30-day clinical consultation. Remote BP reading shows 144/92 mmHg without verified adherence logs.',
+        deltas: [
+          { metric: 'Blood Pressure (SBP/DBP)', baseline: '136/86 mmHg', current: '144/92 mmHg', delta: '+8 mmHg 🔺', isBad: true },
+          { metric: 'HbA1c (Glycated Hb)', baseline: '5.9%', current: '6.0%', delta: '+0.1% 🔺', isBad: true },
+          { metric: 'Fasting Blood Glucose', baseline: '106 mg/dL', current: '112 mg/dL', delta: '+6 mg/dL 🔺', isBad: true },
+          { metric: '7-Day Daily Steps', baseline: '6,400 steps', current: '4,800 steps', delta: '-25.0% 🔻', isBad: true },
+          { metric: 'Resting Heart Rate', baseline: '70 bpm', current: '75 bpm', delta: '+5 bpm 🔺', isBad: true },
+          { metric: 'Medication Adherence', baseline: '80%', current: '35% (Missed)', delta: '-45% 🔻', isBad: true }
+        ],
+        drivers: [
+          { name: 'Loss to Follow-up / Missed Rx Refills', weight: '+0.16', color: 'bg-red-500', width: '65%' },
+          { name: 'Elevated Peripheral SBP (144 mmHg)', weight: '+0.12', color: 'bg-red-500', width: '50%' },
+          { name: 'Declining Physical Movement', weight: '+0.08', color: 'bg-amber-500', width: '35%' },
+          { name: 'Protective Baseline Renal Function', weight: '-0.07', color: 'bg-emerald-500', width: '30%' }
+        ]
+      }
+    ];
+
+    let currentPatientId = 'p1';
+
+    function renderTriageQueue() {
+      const container = document.getElementById('triageQueueGrid');
+      if (!container) return;
+      container.innerHTML = PATIENTS.map(p => {
+        const isSelected = p.id === currentPatientId;
+        return `
+          <div onclick="switchPatient('${p.id}')" class="p-2.5 rounded-lg border cursor-pointer transition ${isSelected ? 'bg-blue-50/80 border-blue-500 shadow-sm ring-2 ring-blue-400/50' : 'bg-white border-slate-200 hover:border-slate-300'}">
+            <div class="flex items-center justify-between mb-1">
+              <span class="font-bold text-slate-900 text-xs">${p.name} (${p.age}${p.gender[0]})</span>
+              <span class="px-1.5 py-0.5 rounded text-[10px] font-bold border ${p.urgencyBadge}">${p.urgency}</span>
+            </div>
+            <div class="text-[11px] text-slate-500 flex justify-between items-center">
+              <span>${p.condition}</span>
+              <span class="font-bold ${p.trajectory.includes('IMPROVING') ? 'text-emerald-700' : 'text-amber-700'}">${p.riskScore}</span>
+            </div>
+            <div class="text-[10px] text-slate-400 mt-1 flex justify-between">
+              <span>${p.ward}</span>
+              <span class="font-medium">${p.trajectory.split(' ')[0]}</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function switchPatient(id) {
+      currentPatientId = id;
+      const p = PATIENTS.find(x => x.id === id);
+      if (!p) return;
+
+      renderTriageQueue();
+
+      // Update patient banner
+      document.getElementById('patientInitials').innerText = p.initials;
+      document.getElementById('patientName').innerText = p.name;
+      document.getElementById('patientRiskBadge').innerText = `${p.tier} RISK (${p.riskScore})`;
+      document.getElementById('patientRiskBadge').className = `px-2 py-0.5 rounded text-xs font-semibold ${p.tier === 'CRITICAL' || p.tier === 'HIGH' ? 'bg-red-100 text-red-800 border border-red-200' : 'bg-emerald-100 text-emerald-800 border border-emerald-200'}`;
+      document.getElementById('patientTrajectoryBadge').innerText = `TRAJECTORY: ${p.trajectory}`;
+      document.getElementById('patientMeta').innerHTML = `
+        <span>${p.age} Years / ${p.gender}</span>
+        <span>ABHA: ${p.abha}</span>
+        <span>${p.location}</span>
+        <span>${p.ward}</span>
+      `;
+
+      // Update Question 2: What changed?
+      document.getElementById('txtTrajectoryBadge').innerText = `TRAJECTORY: ${p.trajectory}`;
+      document.getElementById('deltaNarrative').innerHTML = `<strong>Summary of Change:</strong> ${p.deltaSummary}`;
+      const deltaTable = document.getElementById('deltaTableBody');
+      if (deltaTable) {
+        deltaTable.innerHTML = p.deltas.map(d => `
+          <tr>
+            <td class="p-1.5 font-medium">${d.metric}</td>
+            <td class="p-1.5 text-slate-500">${d.baseline}</td>
+            <td class="p-1.5 font-bold ${d.isBad ? 'text-red-700' : 'text-emerald-700'}">${d.current}</td>
+            <td class="p-1.5"><span class="px-1.5 py-0.5 rounded font-bold text-[10px] ${d.isBad ? 'bg-red-50 text-red-700' : 'bg-emerald-50 text-emerald-700'}">${d.delta}</span></td>
+          </tr>
+        `).join('');
+      }
+
+      // Update Question 3: Why is risk changing?
+      const barsContainer = document.getElementById('attributionBarsContainer');
+      if (barsContainer) {
+        barsContainer.innerHTML = p.drivers.map(drv => `
+          <div>
+            <div class="flex justify-between text-slate-700 mb-1">
+              <span>${drv.name}</span>
+              <span class="font-bold ${drv.weight.startsWith('-') ? 'text-emerald-600' : 'text-red-600'}">${drv.weight}</span>
+            </div>
+            <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+              <div class="${drv.color} h-2 rounded-full" style="width: ${drv.width}"></div>
+            </div>
+          </div>
+        `).join('');
+      }
+
+      // Reset Record Status
+      document.getElementById('legalRecordBadge').className = 'mono font-semibold px-2 py-0.5 rounded text-xs bg-amber-200 text-amber-900';
+      document.getElementById('legalRecordBadge').innerText = 'RECORD STATUS: DRAFT PENDING VERIFICATION';
+      document.getElementById('verifiedBanner').classList.add('hidden');
+    }
+
+    function orderSelectedTests() {
+      alert("✅ Laboratory Order Submitted!\n\nStandard requisitions sent to District Lab / PHC diagnostic unit for:\n• Spot Urine Microalbumin-to-Creatinine Ratio (uACR)\n• Serum Creatinine + calculated eGFR\n• Fasting Lipid Panel\n\nNotification dispatched to assigned ASHA worker.");
+    }
+
+    function requestAshaCalibration() {
+      alert("📋 Outreach Task Created!\n\nTask dispatched to ASHA Worker:\n'Complete 3-reading resting blood pressure calibration with calibrated digital sphygmomanometer within 48 hours.'");
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      renderTriageQueue();
+    });
   </script>
 </body>
 </html>

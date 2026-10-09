@@ -22,6 +22,16 @@ from services.trajectory.router import router as trajectory_router
 from services.health_worker.router import router as health_worker_router
 from services.clinical.interop_router import router as interop_router
 from agents.router import router as agents_router
+from services.identity.privacy_router import router as privacy_router
+from services.demo.router import router as demo_router, challenge_router
+from packages.observability.context import CorrelationContext, SpanStage
+from packages.observability.tracer import tracer
+from packages.observability.metrics import metrics
+from services.observability.router import router as observability_router, serve_observability_portal
+from packages.security.headers import SecureHeadersMiddleware
+from packages.security.rate_limiter import RateLimiterMiddleware
+from services.jobs.router import router as jobs_router
+from packages.queue.manager import job_queue_manager
 
 logger = structlog.get_logger(__name__)
 
@@ -36,6 +46,10 @@ app = FastAPI(
     redoc_url="/redoc",
 )
 
+# Security Middleware (Headers & Rate Limiting)
+app.add_middleware(RateLimiterMiddleware)
+app.add_middleware(SecureHeadersMiddleware)
+
 # Cross-Origin Resource Sharing (CORS)
 app.add_middleware(
     CORSMiddleware,
@@ -48,20 +62,55 @@ app.add_middleware(
 
 @app.middleware("http")
 async def telemetry_middleware(request: Request, call_next):
-    start_time = time.time()
-    response = await call_next(request)
-    duration_ms = round((time.time() - start_time) * 1000, 2)
+    incoming_corr_id = request.headers.get("X-Correlation-ID") or request.headers.get("X-Request-ID")
+    incoming_trace_id = request.headers.get("X-Trace-ID")
+    platform = request.headers.get("X-Client-Platform", "web")
 
-    await telemetry_buffer.emit(
-        event_type="HTTP_REQUEST",
-        payload={
-            "method": request.method,
-            "path": request.url.path,
-            "status_code": response.status_code,
-            "duration_ms": duration_ms,
-        }
-    )
-    return response
+    corr_id = CorrelationContext.set_correlation_id(incoming_corr_id)
+    trace_id = CorrelationContext.set_trace_id(incoming_trace_id)
+    CorrelationContext.set_client_platform(platform)
+    CorrelationContext.set_current_stage(SpanStage.API)
+
+    start_time = time.time()
+    span_name = f"{request.method} {request.url.path}"
+
+    async with tracer.async_span(
+        name=span_name,
+        stage=SpanStage.API,
+        tags={"method": request.method, "path": request.url.path, "platform": platform},
+    ) as current_span:
+        try:
+            response = await call_next(request)
+            duration_ms = round((time.time() - start_time) * 1000, 2)
+
+            metrics.record_api_request(
+                method=request.method,
+                path=request.url.path,
+                status_code=response.status_code,
+                duration_ms=duration_ms,
+            )
+
+            await telemetry_buffer.emit(
+                event_type="HTTP_REQUEST",
+                payload={
+                    "method": request.method,
+                    "path": request.url.path,
+                    "status_code": response.status_code,
+                    "duration_ms": duration_ms,
+                },
+                correlation_id=corr_id,
+            )
+
+            response.headers["X-Correlation-ID"] = corr_id
+            response.headers["X-Request-ID"] = corr_id
+            response.headers["X-Trace-ID"] = trace_id
+            response.headers["X-Span-ID"] = current_span.span_id
+            return response
+        except Exception as exc:
+            duration_ms = round((time.time() - start_time) * 1000, 2)
+            metrics.record_api_request(request.method, request.url.path, 500, duration_ms)
+            metrics.record_error("UNHANDLED_EXCEPTION", "API_GATEWAY", str(exc))
+            raise
 
 
 # Root Web Portal
@@ -123,6 +172,26 @@ app.include_router(fhir_router, prefix="/api/v1")
 app.include_router(health_worker_router, prefix="/api/v1")
 app.include_router(interop_router, prefix="/api/v1")
 app.include_router(agents_router, prefix="/api/v1")
+app.include_router(privacy_router, prefix="/api/v1")
+app.include_router(demo_router, prefix="/api/v1")
+app.include_router(challenge_router, prefix="/api/v1")
+app.include_router(observability_router, prefix="/api/v1")
+app.include_router(jobs_router, prefix="/api/v1")
+
+
+@app.on_event("startup")
+async def on_app_startup():
+    await job_queue_manager.start_workers(concurrency_per_queue=2)
+
+
+@app.on_event("shutdown")
+async def on_app_shutdown():
+    await job_queue_manager.stop_workers()
+
+
+@app.get("/observability", include_in_schema=False)
+async def serve_observability_portal_endpoint():
+    return await serve_observability_portal()
 
 
 @app.get("/health-worker-app", include_in_schema=False)
@@ -153,4 +222,15 @@ async def serve_public_health_app():
     if app_file.exists():
         return FileResponse(app_file)
     return {"message": "Public Health Dashboard is being loaded."}
+
+
+@app.get("/clinician-app", include_in_schema=False)
+async def serve_clinician_app():
+    from fastapi.responses import FileResponse
+    from pathlib import Path
+    app_file = Path(__file__).parent.parent.parent / "apps" / "clinician-web" / "copilot_dashboard.html"
+    if app_file.exists():
+        return FileResponse(app_file)
+    return {"message": "Clinician Copilot Dashboard is being loaded."}
+
 

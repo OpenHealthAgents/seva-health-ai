@@ -1,6 +1,45 @@
+# ==============================================================================
+# SevaHealth AI - Production Multi-Container Orchestration (docker-compose.yml)
+# Compliant with: ABDM, FHIR R4, openEHR, DISHA Healthcare Privacy & Open Wearables
+# Image Strategy: All images strictly pinned to stable releases (Zero nightly/latest)
+# ==============================================================================
+
 version: "3.9"
 
 services:
+  # ----------------------------------------------------------------------------
+  # 1. Reverse Proxy & Unified Gateway (NGINX)
+  # ----------------------------------------------------------------------------
+  reverse-proxy:
+    image: nginx:1.27.0-alpine
+    container_name: sevahealth-reverse-proxy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./infrastructure/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      sevahealth-api:
+        condition: service_healthy
+      sevahealth-ai:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:80/nginx-health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    networks:
+      - sevahealth-network
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 256M
+
+  # ----------------------------------------------------------------------------
+  # 2. Core API Gateway & Clinical Repository (FastAPI)
+  # ----------------------------------------------------------------------------
   sevahealth-api:
     build:
       context: .
@@ -25,17 +64,140 @@ services:
       - CLINICAL_REPOSITORY_BACKEND=hybrid
     depends_on:
       postgres:
-
         condition: service_healthy
       redis:
         condition: service_healthy
       minio:
         condition: service_healthy
+      ehrbase:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
     networks:
       - sevahealth-network
+    deploy:
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: 2048M
 
+  # ----------------------------------------------------------------------------
+  # 3. Asynchronous Background Worker (OCR, Wearables, AI Pipelines)
+  # ----------------------------------------------------------------------------
+  sevahealth-worker:
+    build:
+      context: .
+      dockerfile: infrastructure/docker/Dockerfile.worker
+    container_name: sevahealth-worker
+    restart: unless-stopped
+    ports:
+      - "8002:8002"
+    environment:
+      - ENVIRONMENT=production
+      - DATABASE_URL=postgresql+psycopg://seva:seva_password@postgres:5432/sevahealth_db
+      - REDIS_URL=redis://redis:6379/0
+      - S3_ENDPOINT=http://minio:9000
+      - S3_ACCESS_KEY=minioadmin
+      - S3_SECRET_KEY=minioadmin
+      - S3_BUCKET_NAME=sevahealth-medical-vault
+      - WORKER_CONCURRENCY=4
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8002/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    networks:
+      - sevahealth-network
+    deploy:
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: 2048M
+
+  # ----------------------------------------------------------------------------
+  # 4. Periodic Public Health Surveillance Scheduler
+  # ----------------------------------------------------------------------------
+  sevahealth-scheduler:
+    build:
+      context: .
+      dockerfile: infrastructure/docker/Dockerfile.scheduler
+    container_name: sevahealth-scheduler
+    restart: unless-stopped
+    ports:
+      - "8003:8003"
+    environment:
+      - ENVIRONMENT=production
+      - DATABASE_URL=postgresql+psycopg://seva:seva_password@postgres:5432/sevahealth_db
+      - REDIS_URL=redis://redis:6379/0
+      - SCHEDULER_HEARTBEAT_SEC=60
+    depends_on:
+      sevahealth-api:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8003/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    networks:
+      - sevahealth-network
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 512M
+
+  # ----------------------------------------------------------------------------
+  # 5. Dedicated Multi-Agent AI Decision Intelligence Service
+  # ----------------------------------------------------------------------------
+  sevahealth-ai:
+    build:
+      context: .
+      dockerfile: infrastructure/docker/Dockerfile.ai
+    container_name: sevahealth-ai
+    restart: unless-stopped
+    ports:
+      - "8004:8004"
+    environment:
+      - ENVIRONMENT=production
+      - DATABASE_URL=postgresql+psycopg://seva:seva_password@postgres:5432/sevahealth_db
+      - REDIS_URL=redis://redis:6379/0
+      - AI_PROVIDER=MOCK
+      - AI_MODEL_NAME=gemini-1.5-pro
+    depends_on:
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8004/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    networks:
+      - sevahealth-network
+    deploy:
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: 2048M
+
+  # ----------------------------------------------------------------------------
+  # 6. Primary Clinical Database (PostgreSQL 16.3-alpine)
+  # ----------------------------------------------------------------------------
   postgres:
-    image: postgres:16-alpine
+    image: postgres:16.3-alpine
     container_name: sevahealth-postgres
     restart: unless-stopped
     ports:
@@ -46,7 +208,8 @@ services:
       POSTGRES_DB: sevahealth_db
     volumes:
       - postgres-data:/var/lib/postgresql/data
-      - ./infrastructure/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./infrastructure/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+      - ./infrastructure/postgres/migrations:/docker-entrypoint-initdb.d/migrations:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U seva -d sevahealth_db"]
       interval: 5s
@@ -54,9 +217,17 @@ services:
       retries: 5
     networks:
       - sevahealth-network
+    deploy:
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: 2048M
 
+  # ----------------------------------------------------------------------------
+  # 7. In-Memory Cache & Message Broker (Redis 7.2.5-alpine)
+  # ----------------------------------------------------------------------------
   redis:
-    image: redis:7-alpine
+    image: redis:7.2.5-alpine
     container_name: sevahealth-redis
     restart: unless-stopped
     ports:
@@ -70,7 +241,15 @@ services:
       retries: 5
     networks:
       - sevahealth-network
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 512M
 
+  # ----------------------------------------------------------------------------
+  # 8. S3 Medical Document Vault (MinIO Pinned Release)
+  # ----------------------------------------------------------------------------
   minio:
     image: minio/minio:RELEASE.2024-05-10T01-41-38Z
     container_name: sevahealth-minio
@@ -89,8 +268,19 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+    networks:
+      - sevahealth-network
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 1024M
+
+  # ----------------------------------------------------------------------------
+  # 9. Dedicated openEHR Database (PostgreSQL 16.3-alpine)
+  # ----------------------------------------------------------------------------
   ehrdb:
-    image: postgres:16-alpine
+    image: postgres:16.3-alpine
     container_name: sevahealth-ehrdb
     restart: unless-stopped
     ports:
@@ -108,9 +298,17 @@ services:
       retries: 5
     networks:
       - sevahealth-network
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 1024M
 
+  # ----------------------------------------------------------------------------
+  # 10. openEHR Clinical Archetype Repository (EHRbase 2.15.0 Pinned Release)
+  # ----------------------------------------------------------------------------
   ehrbase:
-    image: ehrbase/ehrbase:next
+    image: ehrbase/ehrbase:2.15.0
     container_name: sevahealth-ehrbase
     restart: unless-stopped
     ports:
@@ -135,6 +333,68 @@ services:
       retries: 5
     networks:
       - sevahealth-network
+    deploy:
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: 2048M
+
+  # ----------------------------------------------------------------------------
+  # 11. Prometheus Telemetry Metrics Scraper
+  # ----------------------------------------------------------------------------
+  prometheus:
+    image: prom/prometheus:v2.52.0
+    container_name: sevahealth-prometheus
+    restart: unless-stopped
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./infrastructure/observability/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:9090/-/healthy || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    networks:
+      - sevahealth-network
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 512M
+
+  # ----------------------------------------------------------------------------
+  # 12. Grafana Real-Time Observability Portal
+  # ----------------------------------------------------------------------------
+  grafana:
+    image: grafana/grafana:11.0.0
+    container_name: sevahealth-grafana
+    restart: unless-stopped
+    ports:
+      - "3001:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=sevahealth_grafana_secret
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - ./infrastructure/observability/grafana/datasources:/etc/grafana/provisioning/datasources:ro
+      - grafana-data:/var/lib/grafana
+    depends_on:
+      prometheus:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:3000/api/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    networks:
+      - sevahealth-network
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 512M
 
 networks:
   sevahealth-network:
@@ -145,4 +405,5 @@ volumes:
   redis-data:
   minio-data:
   ehrdb-data:
-
+  prometheus-data:
+  grafana-data:

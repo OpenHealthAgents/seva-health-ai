@@ -609,6 +609,7 @@ def get_deidentified_export(limit: int = 50) -> DeidentifiedExportResponse:
     return DeidentifiedExportResponse(
         sample_size=len(records),
         export_timestamp=datetime.now(timezone.utc),
+        k_anonymity_guarantee="k >= 10",
         records=records,
     )
 

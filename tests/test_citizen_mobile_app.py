@@ -90,9 +90,9 @@ class TestCitizenMobileAppWebDelivery:
         assert "HOW AM I DOING?" in content
         assert "doingHeadline" in content or "Sugar needs a little care" in content
 
-        # Core Question 2: What's changing?
-        assert "WHAT'S CHANGING?" in content
-        assert "changingText" in content or "Walking increased" in content
+        # Core Question 2: What changed?
+        assert "WHAT CHANGED?" in content or "WHAT'S CHANGING?" in content
+        assert "changingText" in content or "Walking increased" in content or "question-what-changed" in content
 
         # Core Question 3: What should I do today?
         assert "WHAT SHOULD I DO TODAY?" in content

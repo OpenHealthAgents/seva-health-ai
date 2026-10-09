@@ -1,15 +1,24 @@
-.PHONY: help install dev test lint seed docker-up docker-down clean
+.PHONY: help install dev test lint seed demo demo-docker docker-up docker-down clean
 
 help:
-	@echo "SevaHealth AI Development Commands"
+	@echo "SevaHealth AI — Command Menu"
+	@echo "  make demo        - Run complete Seva Innovation Challenge Demo pipeline"
+	@echo "  make demo-docker - Launch self-contained Demo stack in Docker Compose"
 	@echo "  make install     - Install Python dependencies"
 	@echo "  make dev         - Start FastAPI backend with auto-reload"
 	@echo "  make test        - Run test suite"
 	@echo "  make lint        - Run linter and type checker"
 	@echo "  make seed        - Populate synthetic patient personas & regional data"
-	@echo "  make docker-up   - Start full stack in Docker Compose"
+	@echo "  make docker-up   - Start full production stack in Docker Compose"
 	@echo "  make docker-down - Stop Docker Compose stack"
-	@echo "  make clean       - Remove cached files and SQLite databases"
+	@echo "  make clean       - Remove cached files and temporary artifacts"
+
+demo:
+	python scripts/demo.py
+
+demo-docker:
+	docker compose -f docker-compose.demo.yml up -d
+	docker exec -it sevahealth-demo-api python scripts/demo.py
 
 install:
 	pip install -e ".[dev]"

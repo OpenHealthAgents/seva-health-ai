@@ -1,0 +1,53 @@
+# ==============================================================================
+# SevaHealth AI - Production Dependencies (Pinned Manifest)
+# Standards: Zero floating or nightly builds (Open Wearables & SOC2 compliance)
+# Generated for: Python 3.12 (Debian Bookworm slim)
+# ==============================================================================
+
+# Core ASGI Framework & Web Server
+fastapi==0.115.0
+uvicorn[standard]==0.32.0
+python-multipart==0.0.12
+httpx==0.27.2
+
+# Data Validation & Configuration
+pydantic==2.9.2
+pydantic-settings==2.6.0
+pydantic-core==2.23.4
+
+# Database, Relational ORM & Migrations
+sqlalchemy==2.0.35
+alembic==1.13.3
+psycopg[binary]==3.2.1
+
+# In-Memory Cache, Job Queue & Scheduling
+redis==5.1.1
+apscheduler==3.10.4
+
+# Security, IAM & Cryptography
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+bcrypt==4.2.0
+cryptography==43.0.1
+
+# Object Storage / S3 Client
+minio==7.2.9
+
+# Data Processing, Feature Engineering & ML
+numpy==1.26.4
+pandas==2.2.3
+scipy==1.13.1
+scikit-learn==1.5.2
+openpyxl==3.1.5
+pypdf==5.0.1
+pillow==10.4.0
+
+# Telemetry, Metrics & Observability
+structlog==24.4.0
+opentelemetry-api==1.27.0
+opentelemetry-sdk==1.27.0
+prometheus-client==0.21.0
+
+# Serialization & System Utilities
+pyyaml==6.0.2
+typing-extensions==4.12.2

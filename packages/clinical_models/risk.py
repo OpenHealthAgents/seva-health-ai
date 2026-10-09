@@ -21,8 +21,8 @@ class RiskDriver(BaseModel):
     observed_value: str
     target_value: str
     impact_weight: float              # e.g. +0.24 (+24%)
-    category: str                     # "BIOMETRIC", "LIFESTYLE", "GENETIC"
-    evidence_citation: str            # e.g., "ICMR-INDIAB 2023; AHA 2017"
+    category: str = "BIOMETRIC"       # "BIOMETRIC", "LIFESTYLE", "GENETIC"
+    evidence_citation: str = "ICMR Guidelines / Clinical Evidence"
 
 
 class ProtectiveFactor(BaseModel):
@@ -30,7 +30,7 @@ class ProtectiveFactor(BaseModel):
     feature_name: str
     observed_value: str
     impact_weight: float              # e.g. -0.10 (-10%)
-    category: str
+    category: str = "LIFESTYLE"
 
 
 class RiskAssessment(BaseModel):
